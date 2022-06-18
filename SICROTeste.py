@@ -5,6 +5,7 @@ from tkinter import filedialog
 import numpy as np
 import pandas as pd
 
+
 def SOMAComp(CompCode):
 
     if FIC[CompCode] == None:
