@@ -1,14 +1,14 @@
 import openpyxl
-import numpy as np
+import json
 import tkinter as tk
 from tkinter import filedialog
+
 
 # This module is destined to import the data of analytical compositions report from the *.xlsx sicro file to a *.npy
 # file to be used in the sicro.py module. This *.npy file contains all the information necessary to calculate any
 # composition of SICRO.
 
 def sicro_xlsximport():
-
     # Selection and load of the *.xlsx analytical compositions report
     root = tk.Tk()
     root.withdraw()
@@ -26,7 +26,7 @@ def sicro_xlsximport():
         for cell in row:
             if cell.value == "CGCIT":
                 TargetRows.append(cell.row)
-    
+
     # Search of the necessary data in the Excel file and storing in a dictionary
     for row in TargetRows:
         if sheet['A' + str(row)].value == "CGCIT":
@@ -104,7 +104,7 @@ def sicro_xlsximport():
                 transport_stoneroad = sheet['F' + str(row)].value
                 transport_asphalt = sheet['G' + str(row)].value
                 transport.append((transport_code, transport_qtt, transport_dirtroad,
-                                            transport_stoneroad, transport_asphalt))
+                                  transport_stoneroad, transport_asphalt))
                 row = row + 1
             # Add all the data in a dictionary, where the key is the composition number
             comps[comp_number] = (
@@ -113,7 +113,9 @@ def sicro_xlsximport():
             print(row, " ", row * 100 / sheet.max_row, "%")
 
     ps.close()
-    np.save('comps.npy', comps)
+    with open('comps.json', 'w') as fp:
+        json.dump(comps, fp)
     print("Done!")
+
 
 sicro_xlsximport()

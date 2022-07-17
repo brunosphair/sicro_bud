@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-import numpy as np
+import json
 import openpyxl
 
 
@@ -21,6 +21,9 @@ class Composition:
 def comp_sum(comp_code):
     # Do the sum of all the costs inherent to a composition: equipments, labor, materials, auxiliary activities, fixed
     # time and transportation
+    if 'comps' not in globals():
+        json_import()
+
     fic_value = comps[comp_code].fic
     unit_cost = (equips_sum(comp_code) + labor_sum(comp_code)) / comps[comp_code].prod[0]
     sum = round(
@@ -33,6 +36,9 @@ def comp_sum(comp_code):
 
 def wb_equip_import():
     # Imports the equipments data from the *.xlsx file to a dictionary
+
+    global equipments_table
+
     root = tk.Tk()
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Equipamentos',
@@ -70,11 +76,14 @@ def wb_equip_import():
 
     ps.close()
 
-    return equips
+    equipments_table = equips
 
 
 def wb_labor_import():
     # Imports the labors data from the *.xlsx file to a dictionary
+
+    global labor_table
+
     root = tk.Tk()
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Mão de Obra',
@@ -107,11 +116,14 @@ def wb_labor_import():
         row = row + 1
 
     ps.close()
-    return labor
+
+    labor_table = labor
 
 
 def wb_material_import():
     # Imports the materials data from the *.xlsx file to a dictionary
+    global materials_table
+
     root = tk.Tk()
     root.withdraw()
     filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Materiais',
@@ -145,7 +157,7 @@ def wb_material_import():
 
     ps.close()
 
-    return materials
+    materials_table = materials
 
 
 def wb_prices_import():
@@ -184,6 +196,11 @@ def equips_sum(comp_code):
     # Returns the sum of all the costs inherent to equipments in a composition
     equip_sum = 0
 
+    if "equipments_table" not in globals():
+        wb_equip_import()
+    if 'comps' not in globals():
+        json_import()
+
     comp_equips = comps[comp_code].equipment
     if len(comp_equips) != 0:
         for each in comp_equips:
@@ -200,6 +217,11 @@ def equips_sum(comp_code):
 
 def labor_sum(comp_code):
     # Returns the sum of all the costs inherent to labors in a composition
+    if 'comps' not in globals():
+        json_import()
+    if 'labor_table' not in globals():
+        wb_labor_import()
+
     labor_sum = 0
     comp_labor = comps[comp_code].labor
     if len(comp_labor) != 0:
@@ -213,6 +235,11 @@ def labor_sum(comp_code):
 
 def materials_sum(comp_code):
     # Returns the sum of all the costs inherent to materials in a composition
+    if 'comps' not in globals():
+        json_import()
+    if 'materials_table' not in globals():
+        wb_material_import()
+
     material_sum = 0
     materials = comps[comp_code].material
     if len(materials) != 0:
@@ -226,6 +253,9 @@ def materials_sum(comp_code):
 
 def auxactivity_sum(comp_code):
     # Returns the sum of all auxiliary activities costs of a composition
+    if 'comps' not in globals():
+        json_import()
+
     auxactivity_sum = 0
     auxactivity = comps[comp_code].auxactivity
     if len(auxactivity) != 0:
@@ -239,6 +269,9 @@ def auxactivity_sum(comp_code):
 
 def fixedtime_sum(comp_code):
     # Returns the sum of all costs inherent to fixed time of a composition
+    if 'comps' not in globals():
+        json_import()
+
     fixedtime_sum = 0
     fixedtime = comps[comp_code].fixedtime
     if len(fixedtime) != 0:
@@ -252,6 +285,9 @@ def fixedtime_sum(comp_code):
 
 def transport_sum(comp_code):
     # Returns the sum of all transportation costs of a composition
+    if 'comps' not in globals():
+        json_import()
+
     transport_sum = 0
     transport = comps[comp_code].transport
     if len(transport) != 0:
@@ -263,32 +299,27 @@ def transport_sum(comp_code):
     return round(transport_sum, 4)
 
 
-comps = dict()
-# TODO: Implement a list, that informs if a workbook was imported or not, than, put the tables imports inside the
-#  functions that use it, but first, verify if the workbook is already loaded
+def json_import():
+    global comps
 
-equipments_table = wb_equip_import()
-labor_table = wb_labor_import()
-materials_table = wb_material_import()
-price_table = wb_prices_import()
+    comps = dict()
+    with open('comps.json', 'r') as fp:
+        dict_import = json.load(fp)
+    for key in dict_import:
+        comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],
+                                 dict_import[key][4], dict_import[key][5],
+                                 dict_import[key][6], dict_import[key][7], dict_import[key][8])
 
-# TODO: Do the npy import inside a function
-list_import = np.load("comps.npy", allow_pickle=True)
-dict_import = list_import[()]
-for key in dict_import:
-    comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],
-                             dict_import[key][4], dict_import[key][5],
-                             dict_import[key][6], dict_import[key][7], dict_import[key][8])
 
 CompCode = '0308265'
-print('Equip', equips_sum(CompCode))
-print('Mão de obra', labor_sum(CompCode))
-print('Material', materials_sum(CompCode))
-print('Atividades Auxiliares', auxactivity_sum(CompCode))
-print('Tempo Fixo', fixedtime_sum(CompCode))
-print('Momento de Transporte', transport_sum(CompCode))
+print('Equip: R$', equips_sum(CompCode))
+print('Labor: R$', labor_sum(CompCode))
+print('Material: R$', materials_sum(CompCode))
+print('Auxiliary activities: R$', auxactivity_sum(CompCode))
+print('Fixed Time: R$', fixedtime_sum(CompCode))
+print('Transportation: R$', transport_sum(CompCode))
 
-print(round(comp_sum(CompCode), 4))
+print('Total: R$', round(comp_sum(CompCode), 4))
 
 # for code in preco:
 #    if code != '0919002' and code != '0919210' and code != '7119788':
