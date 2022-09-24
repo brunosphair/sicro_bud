@@ -11,7 +11,7 @@ This *.json file contains all the information necessary to calculate any
 composition of SICRO.
 '''
 
-class SicroWorksheet():
+class SicroWorksheet:
     def __init__(self):
         self.comps = {}
 
@@ -33,7 +33,7 @@ class SicroWorksheet():
         self.first_row_mapping()
         self.wb_data_storaging()
         ps.close()
-        with open('comps.json', 'w') as fp:
+        with open('comps2.json', 'w') as fp:
             json.dump(self.comps, fp)
         print("Done!")
 
@@ -60,7 +60,7 @@ class SicroWorksheet():
             comp_number, comp_list = self.get_comp_data(row)
             if comp_number:
                 self.comps[comp_number] = comp_list
-                print(row, " ", row * 100 / self.sheet.max_row, "%")
+                #print(row, " ", row * 100 / self.sheet.max_row, "%")
 
     def get_comp_data(self, row):
         '''

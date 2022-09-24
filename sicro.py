@@ -5,321 +5,356 @@ import openpyxl
 
 
 class Composition:
-    # Creates the composition class, where the data, imported by the sicro_xlsx_import module, is stored.
-    def __init__(self, name, productivity, equipment, labor, material, auxactivity, fixedtime, transport, fic):
+    '''
+    Creates the composition class, where the data, imported by the 
+    sicro_xlsx_import module, is stored.
+    '''
+    def __init__(self,
+                 name,
+                 productivity,
+                 equipment,
+                 labor,
+                 material,
+                 aux_activity,
+                 fixed_time,
+                 transport,
+                 fic):
         self.name = name
         self.prod = productivity
         self.equipment = equipment
         self.labor = labor
         self.material = material
-        self.auxactivity = auxactivity
-        self.fixedtime = fixedtime
+        self.aux_activity = aux_activity
+        self.fixed_time = fixed_time
         self.transport = transport
         self.fic = int(fic)
+    
+    def __str__(self):
+        return self.name
+
+    def comp_sum(self, Tables):
+        '''
+        Do the sum of all the costs inherent to a composition: equipments, 
+        labor, materials, auxiliary activities, fixed time and transportation.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
+
+        fic_value = self.fic
+        unit_cost = (self.equips_sum(Tables) + self.labor_sum(Tables)) / self.prod[0]
+        sum = round(unit_cost + unit_cost * fic_value + self.materials_sum(Tables) \
+            + self.aux_activity_sum(Tables) + self.fixed_time_sum(Tables), 2)
+        
+        # + SomaTransporte(CompCode)
+        # TODO: Find where to put the transport_sum
+
+        return sum
+    
+    def equips_sum(self, Tables):
+        '''
+        Returns the sum of all the costs inherent to equipments in a composition.
+        '''
+        equip_sum = 0
+
+        if not hasattr(Tables, 'equipments_table'):
+            Tables.wb_equip_import()
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
+
+        comp_equips = self.equipment
+        if len(comp_equips) != 0:
+            for each in comp_equips:
+                equip_code = each[0]
+                equip_qtt = each[1]
+                equip_prod = each[2]
+                equip_unprod = each[3]
+                equip_sum = equip_sum + round(
+                    equip_qtt * (equip_prod * Tables.equipments_table[equip_code][8] + equip_unprod * Tables.equipments_table[equip_code][
+                        9]), 4)
+
+        return round(equip_sum, 4)
+    
+    def labor_sum(self, Tables):
+        '''
+        Returns the sum of all the costs inherent to labors in a composition.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
+        if not hasattr(Tables, 'labor_table'):
+            Tables.wb_labor_import()
+
+        labor_sum = 0
+        comp_labor = self.labor
+        if len(comp_labor) != 0:
+            for each in comp_labor:
+                labor_code = each[0]
+                labor_qtt = each[1]
+                labor_sum = labor_sum + round(labor_qtt * Tables.labor_table[labor_code][4], 4)
+
+        return round(labor_sum, 4)
+
+    def materials_sum(self, Tables):
+        '''
+        Returns the sum of all the costs inherent to materials in a composition.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
+        if not hasattr(Tables, 'materials_table'):
+            Tables.wb_material_import()
+
+        material_sum = 0
+        materials = self.material
+        if len(materials) != 0:
+            for each in materials:
+                material_code = each[0]
+                material_qtt = each[1]
+                material_sum = material_sum + round(material_qtt * Tables.materials_table[material_code][2], 4)
+
+        return round(material_sum, 4)
 
 
-def comp_sum(comp_code):
-    # Do the sum of all the costs inherent to a composition: equipments, labor, materials, auxiliary activities, fixed
-    # time and transportation
-    if 'comps' not in globals():
-        json_import()
+    def aux_activity_sum(self, Tables):
+        '''
+        Returns the sum of all auxiliary activities costs of a composition.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
 
-    fic_value = comps[comp_code].fic
-    unit_cost = (equips_sum(comp_code) + labor_sum(comp_code)) / comps[comp_code].prod[0]
-    sum = round(
-        unit_cost + unit_cost * fic_value + materials_sum(comp_code) + auxactivity_sum(comp_code) + fixedtime_sum(
-            comp_code), 2)  # + SomaTransporte(CompCode)
-    # TODO: Find where to put the transport_sum
+        aux_activity_sum = 0
+        aux_activity = self.aux_activity
+        if len(aux_activity) != 0:
+            for each in aux_activity:
+                aux_activity_code = each[0]
+                aux_activity_qtt = each[1]
+                aux_activity_sum = aux_activity_sum + round(aux_activity_qtt * Tables.comps[aux_activity_code].comp_sum(Tables), 4)
 
-    return sum
-
-
-def wb_equip_import():
-    # Imports the equipments data from the *.xlsx file to a dictionary
-
-    global equipments_table
-
-    root = tk.Tk()
-    root.withdraw()
-    filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Equipamentos',
-                                          filetypes=[("Excel files", "*.xlsx")])
-
-    ps = openpyxl.load_workbook(filepath)
-    sheet = ps.active
-
-    equips = {}
-
-    row = 1
-
-    while sheet['A' + str(row)].value != "Código":
-        row = row + 1
-
-    row = row + 1
-
-    while sheet['A' + str(row)].value is None:
-        row = row + 1
-
-    while row <= sheet.max_row:
-        code = sheet['A' + str(row)].value
-        data1 = sheet['B' + str(row)].value
-        data2 = sheet['C' + str(row)].value
-        data3 = sheet['D' + str(row)].value
-        data4 = sheet['E' + str(row)].value
-        data5 = sheet['F' + str(row)].value
-        data6 = sheet['G' + str(row)].value
-        data7 = sheet['H' + str(row)].value
-        data8 = sheet['I' + str(row)].value
-        data9 = sheet['J' + str(row)].value
-        data10 = sheet['K' + str(row)].value
-        equips[code] = (data1, data2, data3, data4, data5, data6, data7, data8, data9, data10)
-        row = row + 1
-
-    ps.close()
-
-    equipments_table = equips
+        return round(aux_activity_sum, 4)
 
 
-def wb_labor_import():
-    # Imports the labors data from the *.xlsx file to a dictionary
+    def fixed_time_sum(self, Tables):
+        '''
+        Returns the sum of all costs inherent to fixed time of a composition.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
 
-    global labor_table
+        fixed_time_sum = 0
+        fixed_time = self.fixed_time
+        if len(fixed_time) != 0:
+            for each in fixed_time:
+                fixed_time_code = each[1]
+                fixed_time_qtt = each[2]
+                fixed_time_sum = fixed_time_sum + round(fixed_time_qtt * Tables.comps[fixed_time_code].comp_sum(Tables), 4)
 
-    root = tk.Tk()
-    root.withdraw()
-    filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Mão de Obra',
-                                          filetypes=[("Excel files", "*.xlsx")])
-
-    ps = openpyxl.load_workbook(filepath)
-    sheet = ps.active
-
-    labor = {}
-
-    row = 1
-
-    while sheet['A' + str(row)].value != "Código":
-        row = row + 1
-
-    row = row + 1
-
-    while sheet['A' + str(row)].value is None:
-        row = row + 1
-
-    while row <= sheet.max_row:
-        code = sheet['A' + str(row)].value
-        data1 = sheet['B' + str(row)].value
-        data2 = sheet['C' + str(row)].value
-        data3 = sheet['D' + str(row)].value
-        data4 = sheet['E' + str(row)].value
-        data5 = sheet['F' + str(row)].value
-        data6 = sheet['G' + str(row)].value
-        labor[code] = (data1, data2, data3, data4, data5, data6)
-        row = row + 1
-
-    ps.close()
-
-    labor_table = labor
+        return round(fixed_time_sum, 4)
 
 
-def wb_material_import():
-    # Imports the materials data from the *.xlsx file to a dictionary
-    global materials_table
+    def transport_sum(self, Tables):
+        '''
+        Returns the sum of all transportation costs of a composition.
+        '''
+        if not hasattr(Tables, 'comps'):
+            Tables.json_import()
 
-    root = tk.Tk()
-    root.withdraw()
-    filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Materiais',
-                                          filetypes=[("Excel files", "*.xlsx")])
+        transport_sum = 0
+        transport = self.transport
+        if len(transport) != 0:
+            for each in transport:
+                transport_code = each[4]
+                transport_qtt = each[1]
+                transport_sum = transport_sum + round(transport_qtt * Tables.comps[transport_code].comp_sum(Tables), 4)
 
-    ps = openpyxl.load_workbook(filepath)
-    sheet = ps.active
+        return round(transport_sum, 4)
 
-    materials = {}
 
-    row = 1
+class Tables:
+    def __init__(self):
+        pass
 
-    while sheet['A' + str(row)].value != "Código":
-        row = row + 1
+    def json_import(self):
 
-    row = row + 1
+        comps = dict()
+        with open('comps.json', 'r') as fp:
+            dict_import = json.load(fp)
+        for key in dict_import:
+            comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],
+                                    dict_import[key][4], dict_import[key][5],
+                                    dict_import[key][6], dict_import[key][7], dict_import[key][8])
+        
+        self.comps = comps
+    
+    def wb_equip_import(self, filepath=None):
+        '''
+        Imports the equipments data from the *.xlsx file to a dictionary.
+        '''
 
-    while sheet['A' + str(row)].value is None:
-        row = row + 1
+        if not filepath:
+            root = tk.Tk()
+            root.withdraw()
+            filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Equipamentos',
+                                                filetypes=[("Excel files", "*.xlsx")])
 
-    while row <= sheet.max_row:
-        code = sheet['A' + str(row)].value
-        data1 = sheet['B' + str(row)].value
-        data2 = sheet['C' + str(row)].value
-        if sheet['D' + str(row)].value == '-':
-            data3 = 0
-        else:
+        ps = openpyxl.load_workbook(filepath)
+        sheet = ps.active
+
+        equips = {}
+
+        row = 1
+
+        while sheet['A' + str(row)].value != "Código":
+            row += 1
+
+        row += 1
+
+        while sheet['A' + str(row)].value is None:
+            row += 1
+
+        while row <= sheet.max_row:
+            code = sheet['A' + str(row)].value
+            data1 = sheet['B' + str(row)].value
+            data2 = sheet['C' + str(row)].value
             data3 = sheet['D' + str(row)].value
-        materials[code] = (data1, data2, data3)
-        row = row + 1
+            data4 = sheet['E' + str(row)].value
+            data5 = sheet['F' + str(row)].value
+            data6 = sheet['G' + str(row)].value
+            data7 = sheet['H' + str(row)].value
+            data8 = sheet['I' + str(row)].value
+            data9 = sheet['J' + str(row)].value
+            data10 = sheet['K' + str(row)].value
+            equips[code] = (data1, data2, data3, data4, data5, data6, data7, data8, data9, data10)
+            row = row + 1
 
-    ps.close()
+        ps.close()
 
-    materials_table = materials
+        self.equipments_table = equips
 
+    def wb_labor_import(self, filepath=None):
+        '''
+        Imports the labors data from the *.xlsx file to a dictionary.
+        '''
 
-def wb_prices_import():
-    # Imports the compositions price data from the *.xlsx file to a dictionary
-    root = tk.Tk()
-    root.withdraw()
-    filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Composições',
-                                          filetypes=[("Excel files", "*.xlsx")])
+        if not filepath:
+            root = tk.Tk()
+            root.withdraw()
+            filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Mão de Obra',
+                                                filetypes=[("Excel files", "*.xlsx")])
 
-    ps = openpyxl.load_workbook(filepath)
-    sheet = ps.active
+        ps = openpyxl.load_workbook(filepath)
+        sheet = ps.active
 
-    price = {}
+        labor = {}
 
-    row = 1
+        row = 1
 
-    while sheet['A' + str(row)].value != "Código":
-        row = row + 1
+        while sheet['A' + str(row)].value != "Código":
+            row += 1
 
-    row = row + 1
+        row += 1
 
-    while sheet['A' + str(row)].value is None:
-        row = row + 1
+        while sheet['A' + str(row)].value is None:
+            row += 1
 
-    while row <= sheet.max_row:
-        code = sheet['A' + str(row)].value
-        data3 = sheet['D' + str(row)].value
-        price[code] = data3
-        row = row + 1
+        while row <= sheet.max_row:
+            code = sheet['A' + str(row)].value
+            data1 = sheet['B' + str(row)].value
+            data2 = sheet['C' + str(row)].value
+            data3 = sheet['D' + str(row)].value
+            data4 = sheet['E' + str(row)].value
+            data5 = sheet['F' + str(row)].value
+            data6 = sheet['G' + str(row)].value
+            labor[code] = (data1, data2, data3, data4, data5, data6)
+            row += 1
 
-    ps.close()
-    return price
+        ps.close()
 
+        self.labor_table = labor
 
-def equips_sum(comp_code):
-    # Returns the sum of all the costs inherent to equipments in a composition
-    equip_sum = 0
+    def wb_material_import(self, filepath=None):
+        '''
+        Imports the materials data from the *.xlsx file to a dictionary.
+        '''
 
-    if "equipments_table" not in globals():
-        wb_equip_import()
-    if 'comps' not in globals():
-        json_import()
+        if not filepath:
+            root = tk.Tk()
+            root.withdraw()
+            filepath = filedialog.askopenfilename(title="Selecione o arquivo referente ao Relatório Sintético de Materiais",
+                                                filetypes=[("Excel files", "*.xlsx")])
 
-    comp_equips = comps[comp_code].equipment
-    if len(comp_equips) != 0:
-        for each in comp_equips:
-            equip_code = each[0]
-            equip_qtt = each[1]
-            equip_prod = each[2]
-            equip_unprod = each[3]
-            equip_sum = equip_sum + round(
-                equip_qtt * (equip_prod * equipments_table[equip_code][8] + equip_unprod * equipments_table[equip_code][
-                    9]), 4)
+        ps = openpyxl.load_workbook(filepath)
+        sheet = ps.active
 
-    return round(equip_sum, 4)
+        materials = {}
 
+        row = 1
 
-def labor_sum(comp_code):
-    # Returns the sum of all the costs inherent to labors in a composition
-    if 'comps' not in globals():
-        json_import()
-    if 'labor_table' not in globals():
-        wb_labor_import()
+        while sheet['A' + str(row)].value != "Código":
+            row += 1
 
-    labor_sum = 0
-    comp_labor = comps[comp_code].labor
-    if len(comp_labor) != 0:
-        for each in comp_labor:
-            labor_code = each[0]
-            labor_qtt = each[1]
-            labor_sum = labor_sum + round(labor_qtt * labor_table[labor_code][4], 4)
+        row += 1
 
-    return round(labor_sum, 4)
+        while sheet['A' + str(row)].value is None:
+            row += 1
 
+        while row <= sheet.max_row:
+            code = sheet['A' + str(row)].value
+            data1 = sheet['B' + str(row)].value
+            data2 = sheet['C' + str(row)].value
+            if sheet['D' + str(row)].value == '-':
+                data3 = 0
+            else:
+                data3 = sheet['D' + str(row)].value
+            materials[code] = (data1, data2, data3)
+            row = row + 1
 
-def materials_sum(comp_code):
-    # Returns the sum of all the costs inherent to materials in a composition
-    if 'comps' not in globals():
-        json_import()
-    if 'materials_table' not in globals():
-        wb_material_import()
+        ps.close()
 
-    material_sum = 0
-    materials = comps[comp_code].material
-    if len(materials) != 0:
-        for each in materials:
-            material_code = each[0]
-            material_qtt = each[1]
-            material_sum = material_sum + round(material_qtt * materials_table[material_code][2], 4)
+        self.materials_table = materials
 
-    return round(material_sum, 4)
+    def wb_prices_import(self, filepath=None):
+        # Imports the compositions price data from the *.xlsx file to a dictionary
+        if not filepath:
+            root = tk.Tk()
+            root.withdraw()
+            filepath = filedialog.askopenfilename(title='Selecione o arquivo referente ao Relatório Sintético de Composições',
+                                                filetypes=[("Excel files", "*.xlsx")])
 
+        ps = openpyxl.load_workbook(filepath)
+        sheet = ps.active
 
-def auxactivity_sum(comp_code):
-    # Returns the sum of all auxiliary activities costs of a composition
-    if 'comps' not in globals():
-        json_import()
+        row = 1
 
-    auxactivity_sum = 0
-    auxactivity = comps[comp_code].auxactivity
-    if len(auxactivity) != 0:
-        for each in auxactivity:
-            auxactivity_code = each[0]
-            auxactivity_qtt = each[1]
-            auxactivity_sum = auxactivity_sum + round(auxactivity_qtt * comp_sum(auxactivity_code), 4)
+        while sheet['A' + str(row)].value != "Código":
+            row += 1
 
-    return round(auxactivity_sum, 4)
+        row += 1
 
+        while sheet['A' + str(row)].value is None:
+            row += 1
 
-def fixedtime_sum(comp_code):
-    # Returns the sum of all costs inherent to fixed time of a composition
-    if 'comps' not in globals():
-        json_import()
+        price = {}
 
-    fixedtime_sum = 0
-    fixedtime = comps[comp_code].fixedtime
-    if len(fixedtime) != 0:
-        for each in fixedtime:
-            fixedtime_code = each[1]
-            fixedtime_qtt = each[2]
-            fixedtime_sum = fixedtime_sum + round(fixedtime_qtt * comp_sum(fixedtime_code), 4)
+        while row <= sheet.max_row:
+            code = sheet['A' + str(row)].value
+            data3 = sheet['D' + str(row)].value
+            price[code] = data3
+            row += 1
 
-    return round(fixedtime_sum, 4)
+        ps.close()
+        
+        self.prices = price
 
+if __name__ == '__main__':
+    tables = Tables()
+    tables.json_import()
+    comp_code = '0308265'
+    print('Equip: R$', tables.comps[comp_code].equips_sum(tables))
+    print('Labor: R$', tables.comps[comp_code].labor_sum(tables))
+    print('Material: R$', tables.comps[comp_code].materials_sum(tables))
+    print('Auxiliary activities: R$', tables.comps[comp_code].aux_activity_sum(tables))
+    print('Fixed Time: R$', tables.comps[comp_code].fixed_time_sum(tables))
+    print('Transportation: R$', tables.comps[comp_code].transport_sum(tables))
 
-def transport_sum(comp_code):
-    # Returns the sum of all transportation costs of a composition
-    if 'comps' not in globals():
-        json_import()
-
-    transport_sum = 0
-    transport = comps[comp_code].transport
-    if len(transport) != 0:
-        for each in transport:
-            transport_code = each[4]
-            transport_qtt = each[1]
-            transport_sum = transport_sum + round(transport_qtt * comp_sum(transport_code), 4)
-
-    return round(transport_sum, 4)
-
-
-def json_import():
-    global comps
-
-    comps = dict()
-    with open('comps.json', 'r') as fp:
-        dict_import = json.load(fp)
-    for key in dict_import:
-        comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],
-                                 dict_import[key][4], dict_import[key][5],
-                                 dict_import[key][6], dict_import[key][7], dict_import[key][8])
-
-
-CompCode = '0308265'
-print('Equip: R$', equips_sum(CompCode))
-print('Labor: R$', labor_sum(CompCode))
-print('Material: R$', materials_sum(CompCode))
-print('Auxiliary activities: R$', auxactivity_sum(CompCode))
-print('Fixed Time: R$', fixedtime_sum(CompCode))
-print('Transportation: R$', transport_sum(CompCode))
-
-print('Total: R$', round(comp_sum(CompCode), 4))
+    print('Total: R$', round(tables.comps[comp_code].comp_sum(tables), 4))
 
 # for code in preco:
 #    if code != '0919002' and code != '0919210' and code != '7119788':
