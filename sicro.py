@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import filedialog
 import json
 import openpyxl
+import db_mod
+import decimal
 
 
 class Composition:
@@ -32,7 +34,7 @@ class Composition:
     def __str__(self):
         return self.name
 
-    def comp_sum(self, Tables):
+    def comp_sum(self, state, date, Tables):
         '''
         Do the sum of all the costs inherent to a composition: equipments, 
         labor, materials, auxiliary activities, fixed time and transportation.
@@ -42,8 +44,8 @@ class Composition:
 
         fic_value = self.fic
         unit_cost = (self.equips_sum(Tables) + self.labor_sum(Tables)) / self.prod[0]
-        sum = round(unit_cost + unit_cost * fic_value + self.materials_sum(Tables) \
-            + self.aux_activity_sum(Tables) + self.fixed_time_sum(Tables), 2)
+        sum = round(unit_cost + unit_cost * fic_value + self.materials_sum(state, date, Tables) \
+            + self.aux_activity_sum(state, date, Tables) + self.fixed_time_sum(state, date, Tables), 2)
         
         # + SomaTransporte(CompCode)
         # TODO: Find where to put the transport_sum
@@ -93,14 +95,14 @@ class Composition:
 
         return round(labor_sum, 4)
 
-    def materials_sum(self, Tables):
+    def materials_sum(self, state, date, Tables):
         '''
         Returns the sum of all the costs inherent to materials in a composition.
         '''
         if not hasattr(Tables, 'comps'):
             Tables.json_import()
-        if not hasattr(Tables, 'materials_table'):
-            Tables.wb_material_import()
+        if not Tables.materials.db_check(state, date, False):
+            Tables.materials.insert_excel(state, date)
 
         material_sum = 0
         materials = self.material
@@ -108,12 +110,12 @@ class Composition:
             for each in materials:
                 material_code = each[0]
                 material_qtt = each[1]
-                material_sum = material_sum + round(material_qtt * Tables.materials_table[material_code][2], 4)
+                material_sum = material_sum + round(material_qtt * float(Tables.materials.search_state_date_code(state, date, material_code)[0][6]), 4)
 
         return round(material_sum, 4)
 
 
-    def aux_activity_sum(self, Tables):
+    def aux_activity_sum(self, state, date, Tables):
         '''
         Returns the sum of all auxiliary activities costs of a composition.
         '''
@@ -126,12 +128,12 @@ class Composition:
             for each in aux_activity:
                 aux_activity_code = each[0]
                 aux_activity_qtt = each[1]
-                aux_activity_sum = aux_activity_sum + round(aux_activity_qtt * Tables.comps[aux_activity_code].comp_sum(Tables), 4)
+                aux_activity_sum = aux_activity_sum + round(aux_activity_qtt * Tables.comps[aux_activity_code].comp_sum(state, date, Tables), 4)
 
         return round(aux_activity_sum, 4)
 
 
-    def fixed_time_sum(self, Tables):
+    def fixed_time_sum(self, state, date, Tables):
         '''
         Returns the sum of all costs inherent to fixed time of a composition.
         '''
@@ -144,12 +146,12 @@ class Composition:
             for each in fixed_time:
                 fixed_time_code = each[1]
                 fixed_time_qtt = each[2]
-                fixed_time_sum = fixed_time_sum + round(fixed_time_qtt * Tables.comps[fixed_time_code].comp_sum(Tables), 4)
+                fixed_time_sum = fixed_time_sum + round(fixed_time_qtt * Tables.comps[fixed_time_code].comp_sum(state, date, Tables), 4)
 
         return round(fixed_time_sum, 4)
 
 
-    def transport_sum(self, Tables):
+    def transport_sum(self, state, date, Tables):
         '''
         Returns the sum of all transportation costs of a composition.
         '''
@@ -162,14 +164,14 @@ class Composition:
             for each in transport:
                 transport_code = each[4]
                 transport_qtt = each[1]
-                transport_sum = transport_sum + round(transport_qtt * Tables.comps[transport_code].comp_sum(Tables), 4)
+                transport_sum = transport_sum + round(transport_qtt * Tables.comps[transport_code].comp_sum(state, date, Tables), 4)
 
         return round(transport_sum, 4)
 
 
 class Tables:
     def __init__(self):
-        pass
+        self.materials = db_mod.Materials()
 
     def json_import(self):
 
@@ -269,47 +271,6 @@ class Tables:
 
         self.labor_table = labor
 
-    def wb_material_import(self, filepath=None):
-        '''
-        Imports the materials data from the *.xlsx file to a dictionary.
-        '''
-
-        if not filepath:
-            root = tk.Tk()
-            root.withdraw()
-            filepath = filedialog.askopenfilename(title="Selecione o arquivo referente ao Relatório Sintético de Materiais",
-                                                filetypes=[("Excel files", "*.xlsx")])
-
-        ps = openpyxl.load_workbook(filepath)
-        sheet = ps.active
-
-        materials = {}
-
-        row = 1
-
-        while sheet['A' + str(row)].value != "Código":
-            row += 1
-
-        row += 1
-
-        while sheet['A' + str(row)].value is None:
-            row += 1
-
-        while row <= sheet.max_row:
-            code = sheet['A' + str(row)].value
-            data1 = sheet['B' + str(row)].value
-            data2 = sheet['C' + str(row)].value
-            if sheet['D' + str(row)].value == '-':
-                data3 = 0
-            else:
-                data3 = sheet['D' + str(row)].value
-            materials[code] = (data1, data2, data3)
-            row = row + 1
-
-        ps.close()
-
-        self.materials_table = materials
-
     def wb_prices_import(self, filepath=None):
         # Imports the compositions price data from the *.xlsx file to a dictionary
         if not filepath:
@@ -347,14 +308,16 @@ if __name__ == '__main__':
     tables = Tables()
     tables.json_import()
     comp_code = '0308265'
+    state = 'PR'
+    date = '01/2021'
     print('Equip: R$', tables.comps[comp_code].equips_sum(tables))
     print('Labor: R$', tables.comps[comp_code].labor_sum(tables))
-    print('Material: R$', tables.comps[comp_code].materials_sum(tables))
-    print('Auxiliary activities: R$', tables.comps[comp_code].aux_activity_sum(tables))
-    print('Fixed Time: R$', tables.comps[comp_code].fixed_time_sum(tables))
-    print('Transportation: R$', tables.comps[comp_code].transport_sum(tables))
+    print('Material: R$', tables.comps[comp_code].materials_sum(state, date, tables))
+    print('Auxiliary activities: R$', tables.comps[comp_code].aux_activity_sum(state, date, tables))
+    print('Fixed Time: R$', tables.comps[comp_code].fixed_time_sum(state, date, tables))
+    print('Transportation: R$', tables.comps[comp_code].transport_sum(state, date, tables))
 
-    print('Total: R$', round(tables.comps[comp_code].comp_sum(tables), 4))
+    print('Total: R$', round(tables.comps[comp_code].comp_sum(state, date, tables), 4))
 
 # for code in preco:
 #    if code != '0919002' and code != '0919210' and code != '7119788':
