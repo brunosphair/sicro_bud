@@ -346,7 +346,6 @@ class SICROEquipments(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Equipments not found:" + code)
         return None
 
     # def get_fic(self, code):
@@ -399,7 +398,6 @@ class SICROLabors(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Labors not found:" + code)
         return None
 
 class SICROMaterials(Connection):
@@ -444,7 +442,6 @@ class SICROMaterials(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Materials not found:" + code)
         return None
 
 class SICROAuxiliaryActivities(Connection):
@@ -489,7 +486,6 @@ class SICROAuxiliaryActivities(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Auxiliary Activities not found:" + code)
         return None
 
 class SICROFixedTime(Connection):
@@ -536,7 +532,6 @@ class SICROFixedTime(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Fixed Time not found:" + code)
         return None
 
 class SICROTransportation(Connection):
@@ -588,7 +583,6 @@ class SICROTransportation(Connection):
         data = self.query(sql)
         if data:
             return data
-        print("Transportation not found:" + code)
         return None
 
 

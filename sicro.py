@@ -86,7 +86,7 @@ def labor_sum(comp_code, state, date, Tables, Sicro):
         for each in comp_labor:
             labor_code = each[1]
             labor_qtt = float(each[2])
-            labor_sum = labor_sum + round(labor_qtt * float(Tables.labors.search_state_date_code(state, date, labor_code)[0][8]), 4)
+            labor_sum = labor_sum + round(labor_qtt * float(Tables.labors.search_state_date_code(state, date, labor_code)[0][7]), 4)
 
     return round(labor_sum, 4)
 
@@ -224,7 +224,7 @@ if __name__ == '__main__':
     tables = Tables()
     sicro = Sicro()
     tables.json_import()
-    comp_code = '0308265'
+    comp_code = '5605965'
     state = 'PR'
     date = '01/2022'
     print('Equip: R$', equips_sum(comp_code, state, date, tables, sicro))
