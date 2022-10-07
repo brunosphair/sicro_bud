@@ -2,49 +2,26 @@ import tkinter as tk
 from tkinter import filedialog
 import openpyxl
 import db_mod
-import json
-
-
-class Composition:
-    '''
-    Creates the composition class, where the data, imported by the 
-    sicro_xlsx_import module, is stored.
-    '''
-    def __init__(self,
-                 name,
-                 productivity,
-                 equipment,
-                 labor,
-                 material,
-                 aux_activity,
-                 fixed_time,
-                 transport,
-                 fic):
-        self.name = name
-        self.prod = productivity
-        self.equipment = equipment
-        self.labor = labor
-        self.material = material
-        self.aux_activity = aux_activity
-        self.fixed_time = fixed_time
-        self.transport = transport
-        self.fic = int(fic)
-    
-    def __str__(self):
-        return self.name
 
 def comp_sum(comp_code, state, date, Tables, Sicro):
     '''
     Do the sum of all the costs inherent to a composition: equipments, 
     labor, materials, auxiliary activities, fixed time and transportation.
     '''
-    if not hasattr(Tables, 'comps'):
-        Tables.json_import()
 
     fic_value = Sicro.general_data.get_fic(comp_code)
-    unit_cost = (equips_sum(comp_code, state, date, Tables, Sicro) + labor_sum(comp_code, state, date, Tables, Sicro)) / Sicro.general_data.get_productivity(comp_code)
-    sum = round(unit_cost + unit_cost * fic_value + materials_sum(comp_code, state, date, Tables, Sicro) \
-        + aux_activity_sum(comp_code, state, date, Tables, Sicro) + fixed_time_sum(comp_code, state, date, Tables, Sicro), 2)
+    unit_cost = (equips_sum(comp_code, state, date, Tables, Sicro) + \
+                 labor_sum(comp_code, state, date, Tables, Sicro)
+                 ) / \
+                 Sicro.general_data.get_productivity(comp_code)
+    sum = round(unit_cost + \
+                unit_cost * \
+                fic_value + \
+                materials_sum(comp_code, state, date, Tables, Sicro) + \
+                aux_activity_sum(comp_code, state, date, Tables, Sicro) + \
+                fixed_time_sum(comp_code, state, date, Tables, Sicro)
+                , 2
+                )
     
     # + SomaTransporte(CompCode)
     # TODO: Find where to put the transport_sum
@@ -68,8 +45,13 @@ def equips_sum(comp_code, state, date, Tables, Sicro):
             equip_qtt = float(each[2])
             equip_prod = float(each[3])
             equip_unprod = float(each[4])
-            equip_sum = equip_sum + round(
-                equip_qtt * (equip_prod * float(Tables.equipments.search_state_date_code(state, date, equip_code)[0][11]) + equip_unprod * float(Tables.equipments.search_state_date_code(state, date, equip_code)[0][12])), 4)
+            equip_sum = equip_sum + \
+                        round(equip_qtt * \
+                        (equip_prod * \
+                        float(Tables.equipments.search_state_date_code(state, date, equip_code)[0][11]) + \
+                        equip_unprod * \
+                        float(Tables.equipments.search_state_date_code(state, date, equip_code)[0][12])) \
+                        ,4)
 
     return round(equip_sum, 4)
     
@@ -86,7 +68,10 @@ def labor_sum(comp_code, state, date, Tables, Sicro):
         for each in comp_labor:
             labor_code = each[1]
             labor_qtt = float(each[2])
-            labor_sum = labor_sum + round(labor_qtt * float(Tables.labors.search_state_date_code(state, date, labor_code)[0][7]), 4)
+            labor_sum = labor_sum + \
+                        round(labor_qtt * \
+                        float(Tables.labors.search_state_date_code(state, date, labor_code)[0][7]) \
+                        , 4)
 
     return round(labor_sum, 4)
 
@@ -112,8 +97,6 @@ def aux_activity_sum(comp_code, state, date, Tables, Sicro):
     '''
     Returns the sum of all auxiliary activities costs of a composition.
     '''
-    if not hasattr(Tables, 'comps'):
-        Tables.json_import()
 
     aux_activity_sum = 0
     aux_activity = Sicro.aux_activities.get_aux_activity(comp_code)
@@ -175,17 +158,6 @@ class Tables:
         self.equipments = db_mod.Equipments()
         self.labors = db_mod.Labors()
 
-    def json_import(self):
-        comps = dict()
-        with open('comps.json', 'r') as fp:
-            dict_import = json.load(fp)
-        for key in dict_import:
-            comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],
-                                    dict_import[key][4], dict_import[key][5],
-                                    dict_import[key][6], dict_import[key][7], dict_import[key][8])
-
-        self.comps = comps
-
     def wb_prices_import(self, filepath=None):
         # Imports the compositions price data from the *.xlsx file to a dictionary
         if not filepath:
@@ -223,7 +195,7 @@ class Tables:
 if __name__ == '__main__':
     tables = Tables()
     sicro = Sicro()
-    tables.json_import()
+    # tables.json_import()
     comp_code = '5605965'
     state = 'PR'
     date = '01/2022'
