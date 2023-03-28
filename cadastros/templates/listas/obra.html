@@ -8,17 +8,20 @@
 </h3>
 <hr>
 <div class="table-responsive">
-    <table class="table table-stripped">
-        <tr>
-            <th>Nome</th>
-            <th>Ano</th>
-            <th>Estado</th>
-            <th>Opções</th>
-        </tr>
-
+    <table class="table table-stripped table-hover">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Ano</th>
+                <th>Estado</th>
+                <th>Opções</th>
+            </tr>
+        </thead>
         {% for obra in object_list %}
         <tr>
-            <td>{{ obra.nome }}</td>
+            <td>
+                <a href="#" class="link-primary">{{ obra.nome }}</a>
+            </td>
             <td>{{ obra.ano }}</td>
             <td>{{ obra.estado }}</td>
             <td>
