@@ -1,7 +1,7 @@
 from django import forms
 
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 
 
@@ -11,10 +11,13 @@ class UsuarioForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
-
+    
     def clean_email(self):
         e = self.cleaned_data['email']
         if User.objects.filter(email=e).exists():
             raise ValidationError("O e-mail {} já está em uso".format(e))
         
         return e
+    
+    class LoginForm(AuthenticationForm):
+        username = forms.CharField(label="Email / Username")
