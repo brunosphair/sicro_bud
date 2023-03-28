@@ -23,6 +23,9 @@ def comp_sum(comp_code, state, date, Tables, Sicro):
                 , 2
                 )
     
+    if not comp_code in Tables.total_comps:
+        Tables.total_comps.add(comp_code)
+    
     # + SomaTransporte(CompCode)
     # TODO: Find where to put the transport_sum
 
@@ -52,6 +55,18 @@ def equips_sum(comp_code, state, date, Tables, Sicro):
                         equip_unprod * \
                         float(Tables.equipments.search_state_date_code(state, date, equip_code)[0][12])) \
                         ,4)
+            
+            #TODO: Change this code to use db
+
+            if not equip_code in Tables.total_equipments:
+                Tables.total_equipments[equip_code] = {}
+            if not "total_sum" in Tables.total_equipments[equip_code]:
+                Tables.total_equipments[equip_code]["total_sum"] = equip_qtt
+                Tables.total_equipments[equip_code]["max_qtt"] = equip_qtt
+            else:
+                Tables.total_equipments[equip_code]["total_sum"] += equip_qtt
+                if Tables.total_equipments[equip_code]["max_qtt"] < equip_qtt:
+                    Tables.total_equipments[equip_code]["max_qtt"] = equip_qtt
 
     return round(equip_sum, 4)
     
@@ -157,6 +172,8 @@ class Tables:
         self.materials = db_mod.Materials()
         self.equipments = db_mod.Equipments()
         self.labors = db_mod.Labors()
+        self.total_equipments = {}
+        self.total_comps = set()
 
     def wb_prices_import(self, filepath=None):
         # Imports the compositions price data from the *.xlsx file to a dictionary
@@ -196,17 +213,23 @@ if __name__ == '__main__':
     tables = Tables()
     sicro = Sicro()
     # tables.json_import()
-    comp_code = '5605965'
+    codes = ['2306726','1416141','1108120','2306730','0407819','2306731','2306014','1106061','3108009','1100657','4507956','3806420','1106088','0307737','0307084','3009024','2408149','2419790','2419705','2419704','2408080','2306671','2306644','2306726','2003767','1901618','1901619','2306269','3106120','2007971','1109669','3107997','3806426','2003652','1106057','3107996','1505879','2003714','2003837','1600405','4915667','4915669','4011278','4011301','4011214']
     state = 'PR'
     date = '01/2022'
-    print('Equip: R$', equips_sum(comp_code, state, date, tables, sicro))
-    print('Labor: R$', labor_sum(comp_code, state, date, tables, sicro))
-    print('Material: R$', materials_sum(comp_code, state, date, tables, sicro))
-    print('Auxiliary activities: R$', aux_activity_sum(comp_code, state, date, tables, sicro))
-    print('Fixed Time: R$', fixed_time_sum(comp_code, state, date, tables, sicro))
-    print('Transportation: R$', transport_sum(comp_code, state, date, tables, sicro))
+    for comp_code in codes:
+        # print('Equip: R$', equips_sum(comp_code, state, date, tables, sicro))
+        # print('Labor: R$', labor_sum(comp_code, state, date, tables, sicro))
+        # print('Material: R$', materials_sum(comp_code, state, date, tables, sicro))
+        # print('Auxiliary activities: R$', aux_activity_sum(comp_code, state, date, tables, sicro))
+        # print('Fixed Time: R$', fixed_time_sum(comp_code, state, date, tables, sicro))
+        # print('Transportation: R$', transport_sum(comp_code, state, date, tables, sicro))
 
-    print('Total: R$', round(comp_sum(comp_code, state, date, tables, sicro), 4))
+        print('Total: R$', round(comp_sum(comp_code, state, date, tables, sicro), 4))
+
+    #for equip in tables.total_equipments:
+    #    print(equip, "|", tables.total_equipments[equip]["total_sum"], "|", tables.total_equipments[equip]["max_qtt"])
+
+    print(tables.total_comps)
 
 # for code in preco:
 #    if code != '0919002' and code != '0919210' and code != '7119788':
