@@ -1,7 +1,7 @@
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 
-from .models import Estado, Obra
+from .models import EstadoAtualizado, Obra
 
 from django.urls import reverse_lazy
 
@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 class ObraCreate(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy('login')
     model = Obra
-    fields = ['nome', 'ano', 'tipo_de_obra', 'estado']
+    fields = ['nome', 'mes', 'ano', 'tipo_de_obra', 'estado']
     template_name = 'form.html'
     success_url = reverse_lazy('listar-obras')
 
@@ -36,7 +36,7 @@ class ObraCreate(LoginRequiredMixin, CreateView):
 class ObraUpdate(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy('login')
     model = Obra
-    fields = ['nome', 'ano', 'tipo_de_obra', 'estado']
+    fields = ['nome', 'mes', 'ano', 'tipo_de_obra', 'estado']
     template_name = 'form.html'
     success_url = reverse_lazy('listar-obras')
 

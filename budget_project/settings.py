@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'budget',
     'cadastros.apps.CadastrosConfig',
     'usuarios.apps.UsuariosConfig',
+    'composicoes.apps.ComposicoesConfig',
     'crispy_forms',
     'crispy_bootstrap5',
     'fontawesomefree',

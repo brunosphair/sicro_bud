@@ -1,0 +1,35 @@
+{% extends 'modelo.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">{{ composicao.codigo }}</th>
+            <th scope="col" colspan="5">{{ composicao.descricao }}</th>
+        </tr>
+    </thead>
+      <tbody class="table-group-divider">
+        <tr>
+          <th scope="row" colspan="2">B-MÃO DE OBRA</th>
+          <th scope="row">Qtde</th>
+          <th scope="row">Unid</th>
+          <th scope="row">Custo horário</th>
+          <th scope="row">Custo horário total</th>
+        </tr>
+        {% for maodeobra in maodeobra %}
+            <tr>
+                <th scope="row">{{ maodeobra.codigo.codigo }}</th>
+                <td>{{ maodeobra.codigo.descricao }}</td>
+                <td>{{ maodeobra.quantidade }}</td>
+                <td>{{ maodeobra.codigo.unidade }}</td>
+                <td>R$ {{ maodeobra.preco }}</td>
+                <td>R$ {{ maodeobra.preco_total }}</td>
+            </tr>
+            {% endfor %}
+      </tbody>
+</table>
+
+{% endblock %}
