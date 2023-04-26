@@ -1,0 +1,139 @@
+{% extends 'modelo.html' %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block content %}
+
+<div class="table table-responsive">
+  <table class="table table-bordered table-sm align-middle text-centeralign-middle text-center">
+    <thead>
+        <tr>
+            <th scope="col">{{ comp.codigo }}</th>
+            <th scope="col" colspan="4">{{ comp.descricao }}</th>
+            <th scope="col" colspan="3">Produção da Equipe: {{ comp.produtividade }} {{ comp.unidade }}</th>
+        </tr>
+    </thead>
+      <tbody class="table-group-divider">
+        <tr>
+          <th scope="row" colspan="2" rowspan="2" class="text-start">A - EQUIPAMENTOS</th>
+          <th scope="row" rowspan="2">Qtde</th>
+          <th scope="row" colspan="2">Utilização</th>
+          <th scope="row" colspan="2">Custo Horário</th>
+          <th scope="row" rowspan="2">Custo Horário Total</th>
+        </tr>
+        <tr>
+          <th scope="row">Oper.</th>
+          <th scope="row">Improd.</th>
+          <th scope="row">Prod.</th>
+          <th scope="row">Improd.</th>
+        </tr>
+        {% for equipamento in comp.equipamento %}
+          <tr>
+            <th scope="row">{{ equipamento.codigo.codigo }}</th>
+            <td class="text-start">{{ equipamento.codigo.descricao }}</td>
+            <td>{{ equipamento.quantidade }}</td>
+            <td>{{ equipamento.utilizacao_operativa }}</td>
+            <td>{{ equipamento.utilizacao_improdutiva }}</td>
+            <td class="text-nowrap">R$ {{ equipamento.custo_produtivo|intcomma }}</td>
+            <td class="text-nowrap">R$ {{ equipamento.custo_improdutivo|intcomma }}</td>
+            <td class="text-nowrap">R$ {{ equipamento.custo_horario_total|intcomma }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo horário total de equipamentos</th>
+          <td scope="row" class="text-nowrap">R$ {{ comp.custototalequipamentos|intcomma }}</td>
+        </tr>
+        <tr>
+          <th scope="row" colspan="2" class="text-start">B - MÃO DE OBRA</th>
+          <th scope="row">Qtde</th>
+          <th scope="row" colspan="2">Unid</th>
+          <th scope="row" colspan="2">Custo Horário</th>
+          <th scope="row">Custo Horário Total</th>
+        </tr>
+        {% for maodeobra in comp.mao_de_obra %}
+            <tr>
+                <th scope="row">{{ maodeobra.codigo.codigo }}</th>
+                <td class="text-start">{{ maodeobra.codigo.descricao }}</td>
+                <td>{{ maodeobra.quantidade }}</td>
+                <td colspan="2">{{ maodeobra.codigo.unidade }}</td>
+                <td colspan="2" class="text-nowrap">R$ {{ maodeobra.preco|intcomma }}</td>
+                <td class="text-nowrap">R$ {{ maodeobra.preco_total|intcomma }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo total de mão de obra</th>
+          <td scope="row" class="text-nowrap">R$ {{ comp.custototalmaodeobra|intcomma }}</td>
+        </tr>
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo horário total de execução</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.custoequipmobra|intcomma }}</th>
+        </tr>
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo unitário de execução</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.custounitariodeexecucao|intcomma }}</th>
+        </tr>
+        <tr>
+          <th scope="row" colspan="2" class="text-start">C - MATERIAL</th>
+          <th scope="row">Qtde</th>
+          <th scope="row" colspan="2">Unid</th>
+          <th scope="row" colspan="2">Preço Unitário</th>
+          <th scope="row">Custo unitário</th>
+        </tr>
+        {% for material in comp.material %}
+          <tr>
+              <th scope="row">{{ material.codigo.codigo }}</th>
+              <td class="text-start">{{ material.codigo.descricao }}</td>
+              <td>{{ material.quantidade }}</td>
+              <td colspan="2">{{ material.codigo.unidade }}</td>
+              <td colspan="2" class="text-nowrap">R$ {{ material.preco|intcomma }}</td>
+              <td class="text-nowrap">R$ {{ material.preco_total|intcomma }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo unitário total de material</th>
+          <td scope="row" class="text-nowrap">R$ {{ comp.custototalmateriais|intcomma }}</td>
+        </tr>
+        <tr>
+          <th scope="row" colspan="2" class="text-start">D - ATIVIDADES AUXILIARES</th>
+          <th scope="row">Qtde</th>
+          <th scope="row" colspan="2">Unid</th>
+          <th scope="row" colspan="2">Custo Unitário</th>
+          <th scope="row">Custo unitário</th>
+        </tr>
+        {% for ativ_auxiliar in comp.ativ_auxiliares %}
+        <tr>
+            <th scope="row">{{ ativ_auxiliar.codigo }}</th>
+            <td class="text-start">{{ ativ_auxiliar.descricao }}</td>
+            <td>{{ ativ_auxiliar.quantidade }}</td>
+            <td colspan="2">{{ ativ_auxiliar.unidade }}</td>
+            <td colspan="2" class="text-nowrap">R$ {{ ativ_auxiliar.custototal|intcomma }}</td>
+            <td class="text-nowrap">R$ {{ ativ_auxiliar.custounitaux|intcomma }}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <th scope="row" colspan="7" class="text-end">Custo total de atividades auxiliares</th>
+        <td scope="row" class="text-nowrap">R$ {{ comp.custoativauxiliares|intcomma }}</td>
+      </tr>
+      <tr>
+        <th scope="row" colspan="7" class="text-end">Subtotal</th>
+        <th scope="row" class="text-nowrap">R$ {{ comp.subtotal|intcomma }}</th>
+      </tr>
+      <tr>
+        <th scope="row" colspan="2" class="text-start">E - TEMPO FIXO</th>
+        <th scope="row">Código</th>
+        <th scope="row">Qtde.</th>
+        <th scope="row">Unid.</th>
+        <th scope="row" colspan="2">Custo Unitário</th>
+        <th scope="row">Custo unitário</th>
+      </tr>
+      <tr>
+        <th scope="row" colspan="7" class="text-end">Custo total</th>
+        <td scope="row" class="text-nowrap">R$ {{ comp.custototal|intcomma }}</td>
+      </tr>
+      </tbody>
+  </table>
+</div>
+
+{% endblock %}

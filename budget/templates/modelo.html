@@ -17,6 +17,8 @@
     <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css" >
     <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css" rel="stylesheet"/>
+
 </head>
 
     {% block navbar %}
@@ -46,7 +48,7 @@
                     <span id="username">{{ request.user }}</span>
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="{% url 'meus-dados' %}">
                         Meus dados
                     </a>
                     <a class="dropdown-item" href="#">
@@ -79,7 +81,7 @@
     </nav>
     {% endblock %}
 
-
+</head>
     <br>
 
 <div class="container">
@@ -97,7 +99,7 @@
         <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
             <svg class="bi" width="30" height="24"><use xlink:href="#bootstrap"/></svg>
         </a>
-        <span class="mb-3 mb-md-0 text-muted">&copy; 2022 Company, Inc</span>
+        <span class="mb-3 mb-md-0 text-muted">&copy; 2023 OrçaJá Ltda.</span>
         </div>
     
         <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
@@ -113,6 +115,10 @@
     <script src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    {% block scripts %}
+
+    {% endblock %}
 
     
 </html>
