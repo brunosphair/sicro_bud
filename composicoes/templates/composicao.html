@@ -75,6 +75,14 @@
           <th scope="row" class="text-nowrap">R$ {{ comp.custounitariodeexecucao|intcomma }}</th>
         </tr>
         <tr>
+          <th scope="row" colspan="7" class="text-end">Custo do FIC</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.custo_fic|intcomma }}</th>
+        </tr>
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo do FIT</th>
+          <th scope="row" class="text-nowrap">-</th>
+        </tr>
+        <tr>
           <th scope="row" colspan="2" class="text-start">C - MATERIAL</th>
           <th scope="row">Qtde</th>
           <th scope="row" colspan="2">Unid</th>
@@ -104,34 +112,49 @@
         </tr>
         {% for ativ_auxiliar in comp.ativ_auxiliares %}
         <tr>
-            <th scope="row">{{ ativ_auxiliar.codigo }}</th>
+            <th scope="row"><a href="{% url 'composicoes' estado=estado ano=ano mes=mes des=des pk=ativ_auxiliar.codigo %}">{{ ativ_auxiliar.codigo }}</a></th>
             <td class="text-start">{{ ativ_auxiliar.descricao }}</td>
             <td>{{ ativ_auxiliar.quantidade }}</td>
             <td colspan="2">{{ ativ_auxiliar.unidade }}</td>
             <td colspan="2" class="text-nowrap">R$ {{ ativ_auxiliar.custototal|intcomma }}</td>
             <td class="text-nowrap">R$ {{ ativ_auxiliar.custounitaux|intcomma }}</td>
         </tr>
-      {% endfor %}
-      <tr>
-        <th scope="row" colspan="7" class="text-end">Custo total de atividades auxiliares</th>
-        <td scope="row" class="text-nowrap">R$ {{ comp.custoativauxiliares|intcomma }}</td>
-      </tr>
-      <tr>
-        <th scope="row" colspan="7" class="text-end">Subtotal</th>
-        <th scope="row" class="text-nowrap">R$ {{ comp.subtotal|intcomma }}</th>
-      </tr>
-      <tr>
-        <th scope="row" colspan="2" class="text-start">E - TEMPO FIXO</th>
-        <th scope="row">Código</th>
-        <th scope="row">Qtde.</th>
-        <th scope="row">Unid.</th>
-        <th scope="row" colspan="2">Custo Unitário</th>
-        <th scope="row">Custo unitário</th>
-      </tr>
-      <tr>
-        <th scope="row" colspan="7" class="text-end">Custo total</th>
-        <td scope="row" class="text-nowrap">R$ {{ comp.custototal|intcomma }}</td>
-      </tr>
+        {% endfor %}
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo total de atividades auxiliares</th>
+          <td scope="row" class="text-nowrap">R$ {{ comp.custoativauxiliares|intcomma }}</td>
+        </tr>
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Subtotal</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.subtotal|intcomma }}</th>
+        </tr>
+        <tr>
+          <th scope="row" colspan="2" class="text-start">E - TEMPO FIXO</th>
+          <th scope="row">Código</th>
+          <th scope="row">Qtde.</th>
+          <th scope="row">Unid.</th>
+          <th scope="row" colspan="2">Custo Unitário</th>
+          <th scope="row">Custo unitário</th>
+        </tr>
+        {% for tempo_fixo in comp.tempo_fixo %}
+        <tr>
+            <th scope="row">{{ tempo_fixo.item_tempo_fixo }}</th>
+            <td class="text-start">{{ tempo_fixo.descricao_item_tempo_fixo }}</td>
+            <td>{{ tempo_fixo.codigo }}</td>
+            <td>{{ tempo_fixo.quantidade }}</td>
+            <td>{{ tempo_fixo.unidade }}</td>
+            <td colspan="2" class="text-nowrap">R$ {{ tempo_fixo.custototal|intcomma }}</td>
+            <td class="text-nowrap">R$ {{ tempo_fixo.custounittempofixo|intcomma }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo unitário total de tempo fixo</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.custotempofixo|intcomma }}</th>
+        </tr>
+        <tr>
+          <th scope="row" colspan="7" class="text-end">Custo total</th>
+          <th scope="row" class="text-nowrap">R$ {{ comp.custototal|intcomma }}</th>
+        </tr>
       </tbody>
   </table>
 </div>

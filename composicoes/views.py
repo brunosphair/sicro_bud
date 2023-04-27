@@ -26,11 +26,14 @@ class MeuDetailView(TemplateView):
         return context
     
 
-def get_comp(pk, estado, ano, mes, desonerado, quantidade=None):
+def get_comp(pk, estado, ano, mes, desonerado, quantidade=None, item_tempo_fixo=None):
     objeto_composicao = get_object_or_404(Sicro, pk=pk)
     comp = {}
     if quantidade:
         comp['quantidade'] = quantidade
+    if item_tempo_fixo:
+        comp['item_tempo_fixo'] = item_tempo_fixo.codigo
+        comp['descricao_item_tempo_fixo'] = item_tempo_fixo.descricao
     comp['descricao'] = objeto_composicao.descricao
     comp['codigo'] = pk
     comp['produtividade'] = objeto_composicao.produtividade
@@ -98,14 +101,27 @@ def get_comp(pk, estado, ano, mes, desonerado, quantidade=None):
     custo_materiais = materiais.aggregate(
         custo_total=Sum('preco_total')
         )
-    if not custo_materiais:
+    if not custo_materiais['custo_total']:
         custo_materiais['custo_total'] = 0
+    
+    if materiais:
+        comp['tempo_fixo'] = []
+        for material in materiais:
+            if material.tempo_fixo:
+                quantidade = material.quantidade_tempo_fixo
+                comp['tempo_fixo'].append(get_comp(material.tempo_fixo.codigo, estado, ano, mes, desonerado, quantidade, material.codigo))
+
+    else:
+        comp['custotempofixo'] = 0
 
     comp['material'] = materiais
     
     custoequipmobra = custo_equipamentos['custo_total'] + custo_mao_de_obra['custo_total']
     comp['custoequipmobra'] = custoequipmobra
     custounitariodeexecucao = round(custoequipmobra / objeto_composicao.produtividade, 4)
+    # precisa alterar essa parte, porque o fic varia de acordo com o estado
+    custo_fic = round(objeto_composicao.fic * custounitariodeexecucao, 4)
+    comp['custo_fic'] = custo_fic
     comp['custounitariodeexecucao'] = custounitariodeexecucao
     comp['custototalmateriais'] = custo_materiais['custo_total']
 
@@ -113,9 +129,13 @@ def get_comp(pk, estado, ano, mes, desonerado, quantidade=None):
     if ativ_auxiliares:
         comp['ativ_auxiliares'] = []
         for ativ_auxiliar in ativ_auxiliares:
-            print(ativ_auxiliar.atividade_aux.codigo)
             quantidade = ativ_auxiliar.quantidade
             comp['ativ_auxiliares'].append(get_comp(ativ_auxiliar.atividade_aux.codigo, estado, ano, mes, desonerado, quantidade))
+            if ativ_auxiliar.tempo_fixo:
+                quantidade = ativ_auxiliar.quantidade_tempo_fixo
+                if not 'tempo_fixo' in comp:
+                    comp['tempo_fixo'] = []
+                comp['tempo_fixo'].append(get_comp(ativ_auxiliar.tempo_fixo.codigo, estado, ano, mes, desonerado, quantidade, ativ_auxiliar.codigo))
         comp['custoativauxiliares'] = 0
         for ativ_auxiliar in comp['ativ_auxiliares']:
             custounitaux = round(ativ_auxiliar['quantidade'] * ativ_auxiliar['custototal'], 4)
@@ -124,10 +144,17 @@ def get_comp(pk, estado, ano, mes, desonerado, quantidade=None):
     else:
         comp['custoativauxiliares'] = 0
     
+    if 'tempo_fixo' in comp:
+        comp['custotempofixo'] = 0
+        for tempo_fixo in comp['tempo_fixo']:
+            custo_unit_tempofixo = round(tempo_fixo['quantidade'] * tempo_fixo['custototal'],4)
+            tempo_fixo['custounittempofixo'] = custo_unit_tempofixo
+            comp['custotempofixo'] += custo_unit_tempofixo
+    else:
+        comp['custotempofixo'] = 0
 
-    
-    subtotal = custounitariodeexecucao + custo_materiais['custo_total'] + comp['custoativauxiliares']
+    subtotal = custounitariodeexecucao + custo_materiais['custo_total'] + comp['custoativauxiliares'] + comp['custo_fic']
     comp['subtotal'] = subtotal
-    comp['custototal'] = subtotal
+    comp['custototal'] = round(subtotal + comp['custotempofixo'], 2)
 
     return comp
