@@ -98,9 +98,12 @@ class MaterialCusto(models.Model):
     preco_unitario = models.DecimalField(max_digits=20, decimal_places=4, verbose_name="Preço Unitário")
 
 class MaterialRelacaoComp(models.Model):
+    id = models.AutoField(primary_key=True)
     comp = models.ForeignKey(Sicro, on_delete=models.CASCADE, verbose_name="Composição")
     codigo = models.ForeignKey(MaterialDescricao, verbose_name="Código", on_delete=models.PROTECT)
     quantidade = models.DecimalField(max_digits=20, decimal_places=5)
+    tempo_fixo = models.ForeignKey(Sicro, on_delete=models.PROTECT, null=True, blank=True, related_name='tempos_fixos')
+    quantidade_tempo_fixo = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True)
 
     class Meta:
         unique_together = ('comp', 'codigo',)
@@ -110,19 +113,9 @@ class AtividadeAuxiliarRelacaoComp(models.Model):
     codigo = models.ForeignKey(Sicro, on_delete=models.CASCADE, verbose_name='Código Composição')
     atividade_aux = models.ForeignKey(Sicro, on_delete=models.PROTECT, verbose_name='Código Atividade Auxiliar', related_name='atividades_auxiliares')
     quantidade = models.DecimalField(max_digits=20, decimal_places=5)
+    tempo_fixo = models.ForeignKey(Sicro, on_delete=models.PROTECT, null=True, blank=True, related_name='tempos_fixos_aux')
+    quantidade_tempo_fixo = models.DecimalField(max_digits=20, decimal_places=5, null=True, blank=True)
 
     class Meta:
         unique_together = ('codigo', 'atividade_aux',)
-
-class TempoFixoRelacaoComp(models.Model):
-    id = models.AutoField(primary_key=True)
-    content_type = models.ForeignKey(
-        ContentType,
-        limit_choices_to=Q(app_label='composicoes', model='sicro') | Q(app_label='composicoes', model='materialdescricao'),
-        verbose_name='Código Item Transportado', on_delete=models.PROTECT)
-    object_id = models.CharField(max_length=7)
-    item_transportado = GenericForeignKey('content_type', 'object_id')
-    codigo = models.ForeignKey(Sicro, on_delete=models.CASCADE, verbose_name='Código Composição')
-    tempo_fixo = models.ForeignKey(Sicro, on_delete=models.PROTECT, verbose_name='Código Tempo Fixo', related_name='tempo_fixos')
-    quantidade = models.DecimalField(max_digits=20, decimal_places=5)
     

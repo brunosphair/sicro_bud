@@ -124,6 +124,8 @@ def get_comp(pk, estado, ano, mes, desonerado, quantidade=None):
     else:
         comp['custoativauxiliares'] = 0
     
+
+    
     subtotal = custounitariodeexecucao + custo_materiais['custo_total'] + comp['custoativauxiliares']
     comp['subtotal'] = subtotal
     comp['custototal'] = subtotal
