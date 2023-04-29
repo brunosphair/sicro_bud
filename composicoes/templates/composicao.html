@@ -10,10 +10,14 @@
   <table class="table table-bordered table-sm align-middle text-centeralign-middle text-center">
     <thead>
         <tr>
-            <th scope="col">{{ comp.codigo }}</th>
-            <th scope="col" colspan="4">{{ comp.descricao }}</th>
+            <th scope="col" rowspan="2">{{ comp.codigo }}</th>
+            <th scope="col" colspan="4" rowspan="2">{{ comp.descricao }}</th>
             <th scope="col" colspan="3">Produção da Equipe: {{ comp.produtividade }} {{ comp.unidade }}</th>
         </tr>
+        <tr>
+          <th scope="col" colspan="2">FIC: {{ comp.fic }}</th>
+          <th scope="col" >FIT:</th>
+      </tr>
     </thead>
       <tbody class="table-group-divider">
         <tr>
@@ -140,7 +144,7 @@
         <tr>
             <th scope="row">{{ tempo_fixo.item_tempo_fixo }}</th>
             <td class="text-start">{{ tempo_fixo.descricao_item_tempo_fixo }}</td>
-            <td>{{ tempo_fixo.codigo }}</td>
+            <td><a href="{% url 'composicoes' estado=estado ano=ano mes=mes des=des pk=tempo_fixo.codigo %}">{{ tempo_fixo.codigo }}</a></td>
             <td>{{ tempo_fixo.quantidade }}</td>
             <td>{{ tempo_fixo.unidade }}</td>
             <td colspan="2" class="text-nowrap">R$ {{ tempo_fixo.custototal|intcomma }}</td>

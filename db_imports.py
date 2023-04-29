@@ -134,7 +134,7 @@ def get_json_gd_sicro(filename):
         general_data["description"] = dict_import[key][0]
         general_data["productivity_unit"] = dict_import[key][1][1]
         general_data["productivity"] = dict_import[key][1][0]
-        general_data["fic"] = int(dict_import[key][8])
+        general_data["fic"] = round(float(dict_import[key][8]))
         sicro_general_data.append(general_data)
         
         # comps[key] = Composition(dict_import[key][0], dict_import[key][1], dict_import[key][2], dict_import[key][3],

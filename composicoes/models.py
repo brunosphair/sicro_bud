@@ -12,10 +12,19 @@ class Sicro(models.Model):
     descricao = models.CharField(max_length=255, verbose_name="Descrição")
     produtividade = models.DecimalField(max_digits=20, decimal_places=4)
     unidade = models.CharField(max_length=10)
-    fic = models.DecimalField(max_digits=6, decimal_places=5)
 
     def __str__(self):
         return self.descricao
+
+class CompFIC(models.Model):
+    id = models.AutoField(primary_key=True)
+    estado = models.CharField(max_length=2)
+    mes = models.PositiveIntegerField(validators=[MinValueValidator(1),
+                                                  MaxValueValidator(12)])
+    ano = models.PositiveIntegerField(validators=[MinValueValidator(2020),
+                                                  MaxValueValidator(2023)])
+    codigo = models.ForeignKey(Sicro, on_delete=models.CASCADE, verbose_name="Código")
+    fic = models.DecimalField(max_digits=6, decimal_places=5, null=True, blank=True)
 
 class MaodeObraDescricao(models.Model):
     codigo = models.CharField(max_length=5, verbose_name="Código", primary_key=True)
