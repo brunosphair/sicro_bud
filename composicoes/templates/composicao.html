@@ -33,7 +33,7 @@
           <th scope="row">Prod.</th>
           <th scope="row">Improd.</th>
         </tr>
-        {% for equipamento in comp.equipamento %}
+        {% for equipamento in comp.tab_equipamentos %}
           <tr>
             <th scope="row">{{ equipamento.codigo.codigo }}</th>
             <td class="text-start">{{ equipamento.codigo.descricao }}</td>
@@ -56,7 +56,7 @@
           <th scope="row" colspan="2">Custo Horário</th>
           <th scope="row">Custo Horário Total</th>
         </tr>
-        {% for maodeobra in comp.mao_de_obra %}
+        {% for maodeobra in comp.tab_mao_de_obra %}
             <tr>
                 <th scope="row">{{ maodeobra.codigo.codigo }}</th>
                 <td class="text-start">{{ maodeobra.codigo.descricao }}</td>
@@ -93,7 +93,7 @@
           <th scope="row" colspan="2">Preço Unitário</th>
           <th scope="row">Custo unitário</th>
         </tr>
-        {% for material in comp.material %}
+        {% for material in comp.tab_material %}
           <tr>
               <th scope="row">{{ material.codigo.codigo }}</th>
               <td class="text-start">{{ material.codigo.descricao }}</td>
@@ -114,7 +114,7 @@
           <th scope="row" colspan="2">Custo Unitário</th>
           <th scope="row">Custo unitário</th>
         </tr>
-        {% for ativ_auxiliar in comp.ativ_auxiliares %}
+        {% for ativ_auxiliar in comp.tab_ativ_auxiliares %}
         <tr>
             <th scope="row"><a href="{% url 'composicoes' estado=estado ano=ano mes=mes des=des pk=ativ_auxiliar.codigo %}">{{ ativ_auxiliar.codigo }}</a></th>
             <td class="text-start">{{ ativ_auxiliar.descricao }}</td>
