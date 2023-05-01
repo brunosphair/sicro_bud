@@ -7,9 +7,10 @@ from .models import (
 from django.shortcuts import get_object_or_404
 from django.db.models import F, OuterRef, Subquery, DecimalField, Sum
 from django.db.models.functions import Cast
+import concurrent.futures
 
 
-class MeuDetailView(TemplateView):
+class CompView(TemplateView):
     template_name = "composicao.html"
     model = MaodeObraRelacaoComp
 
@@ -28,6 +29,30 @@ class MeuDetailView(TemplateView):
         context['comp'] = comp_data
 
         return context
+    
+class TesteView(TemplateView):
+    template_name = "comp_teste.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        comp_list = Sicro.objects.all()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            # Mapeia a função get_composition_cost em uma lista de composições
+            # O resultado é um iterator que retorna tuplas (código, custo)
+            results = executor.map(get_composition_cost, comp_list)
+
+            # Imprime o resultado
+            for codigo, custo in results:
+                print(codigo, custo)
+
+        return context
+    
+def get_composition_cost(comp):
+    comp = Composicao(comp.codigo, "PR", 2022, 1, "N")
+    custo = comp.get_custo_total()
+    return (comp.codigo, custo)
     
 class Composicao:
     def __init__(self, pk, estado, ano, mes, desonerado):
@@ -223,6 +248,13 @@ class Composicao:
         
         return custo_materiais['custo_total']
     
+    def get_custo_total(self):
+        all_data = self.get_comp_all_data()
+
+        custo_total = all_data['custototal']
+
+        return custo_total
+
     def get_tab_ativ_auxiliares(self):
         
         ativ_auxiliares = AtividadeAuxiliarRelacaoComp.objects.filter(codigo=self.codigo)
@@ -270,7 +302,6 @@ class Composicao:
             ativ_auxiliares = AtividadeAuxiliarRelacaoComp.objects.filter(codigo=codigo)
             for ativ_auxiliar in ativ_auxiliares:
                 if ativ_auxiliar.tempo_fixo:
-                    print(ativ_auxiliar.tempo_fixo)
                     quantidade = ativ_auxiliar.quantidade_tempo_fixo
                     tempo_fixo_obj = Composicao(ativ_auxiliar.tempo_fixo.codigo,
                                                 self.estado, self.ano, self.mes,

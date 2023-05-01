@@ -7,10 +7,10 @@
 {% block content %}
 
 <div class="table table-responsive">
-  <table class="table table-bordered table-sm align-middle text-centeralign-middle text-center">
+  <table class="table table-sm align-middle text-centeralign-middle text-center">
     <thead>
-        <tr>
-            <th scope="col" rowspan="2">{{ comp.codigo }}</th>
+        <tr style="border-top: 2px solid black">
+            <th scope="col" rowspan="2" valign="middle">{{ comp.codigo }}</th>
             <th scope="col" colspan="4" rowspan="2">{{ comp.descricao }}</th>
             <th scope="col" colspan="3">Produção da Equipe: {{ comp.produtividade }} {{ comp.unidade }}</th>
         </tr>
@@ -19,20 +19,23 @@
           <th scope="col" >FIT:</th>
       </tr>
     </thead>
-      <tbody class="table-group-divider">
-        <tr>
-          <th scope="row" colspan="2" rowspan="2" class="text-start">A - EQUIPAMENTOS</th>
-          <th scope="row" rowspan="2">Qtde</th>
-          <th scope="row" colspan="2">Utilização</th>
-          <th scope="row" colspan="2">Custo Horário</th>
-          <th scope="row" rowspan="2">Custo Horário Total</th>
+      <tbody>
+        <tr style="border-top: 2px solid black; border-bottom: 1px solid black;">
+          <tr>
+            <th scope="row" colspan="2" rowspan="2" class="text-start">A - EQUIPAMENTOS</th>
+            <th scope="row" rowspan="2">Qtde</th>
+            <th scope="row" colspan="2">Utilização</th>
+            <th scope="row" colspan="2">Custo Horário</th>
+            <th scope="row" rowspan="2">Custo Horário Total</th>
+          </tr>
+          <tr style="border-top: 2px solid black; border-bottom: 2px solid black;">
+            <th scope="row">Oper.</th>
+            <th scope="row">Improd.</th>
+            <th scope="row">Prod.</th>
+            <th scope="row">Improd.</th>
+          </tr>
         </tr>
-        <tr>
-          <th scope="row">Oper.</th>
-          <th scope="row">Improd.</th>
-          <th scope="row">Prod.</th>
-          <th scope="row">Improd.</th>
-        </tr>
+          
         {% for equipamento in comp.tab_equipamentos %}
           <tr>
             <th scope="row">{{ equipamento.codigo.codigo }}</th>
@@ -49,7 +52,7 @@
           <th scope="row" colspan="7" class="text-end">Custo horário total de equipamentos</th>
           <td scope="row" class="text-nowrap">R$ {{ comp.custototalequipamentos|intcomma }}</td>
         </tr>
-        <tr>
+        <tr style="border-top: 2px solid black; border-bottom: 2px solid black;">
           <th scope="row" colspan="2" class="text-start">B - MÃO DE OBRA</th>
           <th scope="row">Qtde</th>
           <th scope="row" colspan="2">Unid</th>
@@ -70,7 +73,7 @@
           <th scope="row" colspan="7" class="text-end">Custo total de mão de obra</th>
           <td scope="row" class="text-nowrap">R$ {{ comp.custototalmaodeobra|intcomma }}</td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 1px solid black;">
           <th scope="row" colspan="7" class="text-end">Custo horário total de execução</th>
           <th scope="row" class="text-nowrap">R$ {{ comp.custoequipmobra|intcomma }}</th>
         </tr>
@@ -86,7 +89,7 @@
           <th scope="row" colspan="7" class="text-end">Custo do FIT</th>
           <th scope="row" class="text-nowrap">-</th>
         </tr>
-        <tr>
+        <tr style="border-top: 2px solid black; border-bottom: 2px solid black;">
           <th scope="row" colspan="2" class="text-start">C - MATERIAL</th>
           <th scope="row">Qtde</th>
           <th scope="row" colspan="2">Unid</th>
@@ -107,7 +110,7 @@
           <th scope="row" colspan="7" class="text-end">Custo unitário total de material</th>
           <td scope="row" class="text-nowrap">R$ {{ comp.custototalmateriais|intcomma }}</td>
         </tr>
-        <tr>
+        <tr style="border-top: 2px solid black; border-bottom: 2px solid black;">
           <th scope="row" colspan="2" class="text-start">D - ATIVIDADES AUXILIARES</th>
           <th scope="row">Qtde</th>
           <th scope="row" colspan="2">Unid</th>
@@ -124,7 +127,7 @@
             <td class="text-nowrap">R$ {{ ativ_auxiliar.custounitaux|intcomma }}</td>
         </tr>
         {% endfor %}
-        <tr>
+        <tr style="border-bottom: 1px solid black;">
           <th scope="row" colspan="7" class="text-end">Custo total de atividades auxiliares</th>
           <td scope="row" class="text-nowrap">R$ {{ comp.custoativauxiliares|intcomma }}</td>
         </tr>
@@ -132,7 +135,7 @@
           <th scope="row" colspan="7" class="text-end">Subtotal</th>
           <th scope="row" class="text-nowrap">R$ {{ comp.subtotal|intcomma }}</th>
         </tr>
-        <tr>
+        <tr style="border-top: 2px solid black; border-bottom: 2px solid black;">
           <th scope="row" colspan="2" class="text-start">E - TEMPO FIXO</th>
           <th scope="row">Código</th>
           <th scope="row">Qtde.</th>
@@ -155,8 +158,8 @@
           <th scope="row" colspan="7" class="text-end">Custo unitário total de tempo fixo</th>
           <th scope="row" class="text-nowrap">R$ {{ comp.custotempofixo|intcomma }}</th>
         </tr>
-        <tr>
-          <th scope="row" colspan="7" class="text-end">Custo total</th>
+        <tr style="border-bottom: 2px solid black;">
+          <th scope="row" colspan="7" class="text-end">Custo unitário direto total</th>
           <th scope="row" class="text-nowrap">R$ {{ comp.custototal|intcomma }}</th>
         </tr>
       </tbody>

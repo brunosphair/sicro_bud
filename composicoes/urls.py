@@ -1,7 +1,8 @@
 from django.urls import path
 
-from .views import MeuDetailView
+from .views import CompView, TesteView
 
 urlpatterns = [
-    path('comp/sicro/<str:estado>/<int:ano>/<int:mes>/<str:des>/<str:pk>', MeuDetailView.as_view(), name='composicoes'),
+    path('comp/sicro/<str:estado>/<int:ano>/<int:mes>/<str:des>/<str:pk>', CompView.as_view(), name='composicoes'),
+    path('comp/teste', TesteView.as_view(), name ='comp_teste'),
 ]
