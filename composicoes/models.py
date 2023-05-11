@@ -15,6 +15,9 @@ class Sicro(models.Model):
 
     def __str__(self):
         return self.descricao
+    
+    class Meta:
+        indexes = [models.Index(fields=['codigo',]),]
 
 class CompFIC(models.Model):
     id = models.AutoField(primary_key=True)
@@ -54,6 +57,7 @@ class MaodeObraRelacaoComp(models.Model):
 
     class Meta:
         unique_together = ('comp', 'codigo',)
+        indexes = [models.Index(fields=['comp', 'codigo',]),]
 
 class EquipamentoDescricao(models.Model):
     codigo = models.CharField(max_length=5, verbose_name="Código", primary_key=True)
