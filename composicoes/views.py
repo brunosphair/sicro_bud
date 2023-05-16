@@ -190,8 +190,6 @@ def test_composicoes(comp_list_dict, estado, ano, mes, desonerado):
         custo_unit = soma[key] / prod_dict[key]
         custo_unit_dict[key] = round(custo_unit, 4)
 
-    # print('custo_unit:', dict_custo_unit['0605460'])
-
     dict_custo_unit_com_fic = {}
 
     for key in custo_unit_dict.keys():
@@ -219,8 +217,6 @@ def test_composicoes(comp_list_dict, estado, ano, mes, desonerado):
         soma = dict_custo_unit_com_fic[key] + dict_materiais.get(key, 0)
         dict_custo_unit_e_material[key] = soma
 
-    # print('com material:', dict_custo_unit_e_material['0605460'])
-
     dict_custo_com_tempo_fixo = {}
     for key in dict_custo_unit_e_material:
         if tempo_fixo_dict.get(key, 0) == 0:
@@ -231,20 +227,12 @@ def test_composicoes(comp_list_dict, estado, ano, mes, desonerado):
                 quantidade = item[1]
                 tempo_fixo_id = item[0]
                 preco_tempo_fixo = dict_custo_unit_e_material[tempo_fixo_id]
-                # print('quantidade:', quantidade, 'preco:', preco_tempo_fixo)
                 total_ativ_auxiliares += round(quantidade * round(preco_tempo_fixo, 2), 4)
-            # print('id:', key, 'total_tempo_fixo:', total_ativ_auxiliares)
             dict_custo_com_tempo_fixo[key] = dict_custo_unit_e_material[key] + total_ativ_auxiliares
-
-    # print(dict_custo_com_tempo_fixo['0605460'])
-    # print(list_total)
 
     dict_custo_total = {}
 
-    # print('dict_ativ_aux:', dict_ativ_auxiliares)
-    # print('ativ_aux:', dict_ativ_auxiliares)
     for nivel in reversed(range(maior_nivel + 1)):
-        # print(nivel)
         for comp_code in list_total:
             if comp_nivel[comp_code] == nivel:
                 total_ativ_auxiliar = 0
