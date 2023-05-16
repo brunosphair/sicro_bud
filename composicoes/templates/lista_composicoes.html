@@ -13,6 +13,7 @@
         <thead>
             <tr>
                 <th>Código</th>
+                <th>Grupo</th>
                 <th>Descrição</th>
                 <th>Custo Unitário</th>
             </tr>
@@ -23,10 +24,11 @@
             {% for item in lista_precos %}
             <tr>
                 <td>
-                    <a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.0 %}" class="link-primary">{{ item.0 }}</a>
+                    <a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.codigo %}" class="link-primary">{{ item.codigo }}</a>
                 </td>
-                <td>{{ item.1 }}</td>
-                <td class="text-center">R$ {{ item.2|intcomma }}</td>
+                <td>{{ item.grupo }}</td>
+                <td>{{ item.descricao }}</td>
+                <td class="text-center">R$ {{ item.custo|intcomma }}</td>
             </tr>
             
             {% endfor %}

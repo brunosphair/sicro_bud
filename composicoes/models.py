@@ -131,4 +131,9 @@ class AtividadeAuxiliarRelacaoComp(models.Model):
 
     class Meta:
         unique_together = ('codigo', 'atividade_aux',)
+
+class GrupoSicro(models.Model):
+    grupo = models.CharField(max_length=2, primary_key=True)
+    descricao = models.CharField(max_length=100, verbose_name="Descrição")
+    
     
