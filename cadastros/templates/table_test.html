@@ -1,0 +1,85 @@
+{% extends 'modelo.html' %}
+
+{% load static %}
+
+{% block content %}
+<h3>Lista de Obras Registradas
+<a href="{% url 'cadastrar-obra' %}" class="btn btn-primary btn-sm float-end">Adicionar Obra</a>
+</h3>
+<hr>
+<div class="table-responsive">
+    <table id="my-table" class="table table-stripped table-hover" id="tabela-listar">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Ano</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            <tr>
+                <td><input type="text" id="search-input">
+                    <select id="search-dropdown">teste</select></td>
+                <td>teste</td>
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td><input type="text" id="search-input">
+                    <select id="search-dropdown"></select></td>
+                <td>{{ item.coluna2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+            
+    </table>
+</div>
+
+<button id="add-row">Adicionar Linha</button>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        
+        $("#tabela-listar").DataTable({
+            responsive: true,
+            // "bSort": false,
+            "aaSorting": [],
+            "pageLength": 50,
+            "language": {
+                "decimal": "",
+                "emptyTable": "Sem dados disponíveis",
+                "info": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+                "infoEmpty": "Mostrando de 0 até 0 de 0 registos",
+                "infoFiltered": "(filtrado de _MAX_ registos no total)",
+                "infoPostFix": "",
+                "thousands": ",",
+                "lengthMenu": "Mostrar _MENU_ registos",
+                "loadingRecords": "A carregar dados...",
+                "processing": "A processar...",
+                "search": "Procurar:",
+                "zeroRecords": "Não foram encontrados resultados",
+                "paginate": {
+                    "first": "Primeiro",
+                    "last": "Último",
+                    "next": "Seguinte",
+                    "previous": "Anterior"
+                },
+                "aria": {
+                    "sortAscending": ": ordem crescente",
+                    "sortDescending": ": ordem decrescente"
+                }
+            }
+        });
+
+    });
+ 
+</script>
+
+
+{% endblock %}
