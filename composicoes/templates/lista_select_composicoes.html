@@ -2,41 +2,35 @@
 
 {% load static %}
 
+{% load humanize %}
+
 {% block content %}
-<h3>Lista de Obras Registradas
-<a href="{% url 'cadastrar-obra' %}" class="btn btn-primary btn-sm float-end">Adicionar Obra</a>
+<h3>Composicões
 </h3>
 <hr>
 <div class="table-responsive">
-    <table class="table table-stripped table-hover" id="tabela-listar">
+    <table class="table table-stripped table-hover" id="tabela-selecionar">
         <thead>
             <tr>
-                <th>Nome</th>
-                <th>Ano</th>
-                <th>Mês</th>
-                <th>Estado</th>
-                <th>Opções</th>
+                <th></th>
+                <th>Código</th>
+                <th>Grupo</th>
+                <th>Descrição</th>
+                <th>Custo Unitário</th>
             </tr>
         </thead>
         
         <tbody>
 
-            {% for obra in object_list %}
+            {% for item in lista_precos %}
             <tr>
+                <td></td>
                 <td>
-                    <a href="{% url 'select_comps' obra.pk %}" class="link-primary">{{ obra.nome }}</a>
+                    <a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.codigo %}" class="link-primary">{{ item.codigo }}</a>
                 </td>
-                <td>{{ obra.ano }}</td>
-                <td>{{ obra.mes }}</td>
-                <td>{{ obra.estado }}</td>
-                <td>
-                    <a href="{% url 'editar-obra' obra.pk %}" class="btn btn-warning btn-sm" title="Editar">
-                        <i class="fa fa-pencil" aria-hidden="true"></i>
-                    </a>
-                    <a href="{% url 'excluir-obra' obra.pk %}" class="btn btn-danger btn-sm" title="Excluir">
-                        <i class="fa fa-trash" aria-hidden="true"></i>
-                    </a>
-                </td>
+                <td>{{ item.grupo }}</td>
+                <td>{{ item.descricao }}</td>
+                <td class="text-center">R$ {{ item.custo|intcomma }}</td>
             </tr>
             
             {% endfor %}
@@ -50,12 +44,42 @@
 {% block scripts %}
 
 <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
 
 <script>
 
     $(document).ready(function () {
-        
-        $("#tabela-listar").DataTable({
+        $("#tabela-selecionar").DataTable({
+            columnDefs: [ {
+                orderable: false,
+                className: 'select-checkbox',
+                targets:   0
+            } ],
+            select: {
+                style:    'os',
+                selector: 'td:first-child'
+            },
+            order: [[ 1, 'asc' ]],
+            columns:[
+                { data: 'checkbox' },
+                { data: 'codigo' },
+                { data: 'grupo' },
+                { data: 'descricao'},
+                { data: 'custo' }
+            ],
+            select: {
+                    style: 'multi'
+                },
+            dom: 'Bfrtip',
+            buttons: [
+                { 
+                    extend: 'showSelected',
+                    text: 'Mostrar apenas selecionadas'
+                },
+            ],
+            rowId: 'codigo',
+            stateSave: true,
             responsive: true,
             // "bSort": false,
             "aaSorting": [],

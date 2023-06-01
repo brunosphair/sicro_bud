@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
+from composicoes.models import Sicro, CompFIC
 
 # Create your models here.
 class EstadoAtualizado(models.Model):
@@ -10,7 +11,9 @@ class EstadoAtualizado(models.Model):
     def __str__(self):
         return self.sigla
 
+
 class Obra(models.Model):
+    id = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=150)
     mes = models.PositiveIntegerField(validators=[MinValueValidator(1),
                                                   MaxValueValidator(12)],
@@ -26,4 +29,9 @@ class Obra(models.Model):
 
     def __str__(self):
         return self.nome
-    
+
+
+class CompsObra(models.Model):
+    id = models.AutoField(primary_key=True)
+    obra = models.ForeignKey(Obra, on_delete=models.CASCADE)
+    composicao = models.ForeignKey(Sicro, on_delete=models.PROTECT)

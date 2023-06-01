@@ -4,6 +4,7 @@ from .models import (
     EquipamentoRelacaoComp, MaterialRelacaoComp, MaterialCusto,
     AtividadeAuxiliarRelacaoComp, CompFIC, GrupoSicro
 )
+from cadastros.models import Obra
 from django.shortcuts import get_object_or_404
 from django.db.models import Case, F, OuterRef, Subquery, DecimalField, Sum, Value, When
 from django.db.models.functions import Cast
@@ -563,6 +564,31 @@ class Composicao:
             custo_tempo_fixo = 0
 
         return custo_tempo_fixo
+
+
+class SelectCompsView(TemplateView):
+    template_name = 'lista_select_composicoes.html'
+
+    def get_context_data(self, **kwargs):
+        # obtencao das variaveis passadas na url
+        context = super().get_context_data(**kwargs)
+
+        id_obra = kwargs.get('id')
+        obra_object = Obra.objects.get(id=id_obra)
+        estado = obra_object.estado
+        ano = obra_object.ano
+        mes = obra_object.mes
+        desonerado = 'N'
+
+        print(estado, ano, mes)
+
+        comp_list_dict = list(Sicro.objects.values('codigo'))
+
+        lista_precos = get_composicoes(comp_list_dict, estado, ano, mes, desonerado)
+
+        context['lista_precos'] = lista_precos
+
+        return context
 
 
 def get_equip_info(estado, ano, mes, desonerado):
