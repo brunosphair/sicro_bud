@@ -50,7 +50,7 @@ class CompTodasView(TemplateView):
         comp_list_dict = list(Sicro.objects.values('codigo'))
         print(comp_list_dict)
 
-        lista_precos = test_composicoes(comp_list_dict, estado, ano, mes, desonerado)
+        lista_precos = get_composicoes(comp_list_dict, estado, ano, mes, desonerado)
 
         context['lista_precos'] = lista_precos
         time_end = time.time()
@@ -59,7 +59,7 @@ class CompTodasView(TemplateView):
         return context
 
 
-def test_composicoes(comp_list_dict, estado, ano, mes, desonerado):
+def get_composicoes(comp_list_dict, estado, ano, mes, desonerado):
 
     comp_list = []
     for codigo in comp_list_dict:

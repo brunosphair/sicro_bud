@@ -4,6 +4,7 @@ from .views import ObraCreate
 from .views import ObraUpdate
 from .views import ObraDelete
 from .views import ObraList
+from .views import TesteObra
 
 
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
     path('excluir/obra/<int:pk>/', ObraDelete.as_view(), name='excluir-obra'),
 
     path('listar/obras/', ObraList.as_view(), name='listar-obras'),
+
+    path('teste/obra/', TesteObra.as_view(), name='teste_obra')
 ]
