@@ -13,6 +13,7 @@
         <thead>
             <tr>
                 <th></th>
+                <th></th>
                 <th>Código</th>
                 <th>Grupo</th>
                 <th>Descrição</th>
@@ -25,9 +26,11 @@
             {% for item in lista_precos %}
             <tr>
                 <td></td>
-                <td>
-                    <a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.codigo %}" class="link-primary">{{ item.codigo }}</a>
+                <td><a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.codigo %}" class="link-primary" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fa-solid fa-magnifying-glass" style="color:#4c2061"></i>
+                    </a>
                 </td>
+                <td>{{ item.codigo }}</td>
                 <td>{{ item.grupo }}</td>
                 <td>{{ item.descricao }}</td>
                 <td class="text-center">R$ {{ item.custo|intcomma }}</td>
@@ -50,7 +53,7 @@
 <script>
 
     $(document).ready(function () {
-        $("#tabela-selecionar").DataTable({
+        var tabela = $("#tabela-selecionar").DataTable({
             columnDefs: [ {
                 orderable: false,
                 className: 'select-checkbox',
@@ -63,6 +66,7 @@
             order: [[ 1, 'asc' ]],
             columns:[
                 { data: 'checkbox' },
+                { data: 'info' },
                 { data: 'codigo' },
                 { data: 'grupo' },
                 { data: 'descricao'},
@@ -76,6 +80,31 @@
                 { 
                     extend: 'showSelected',
                     text: 'Mostrar apenas selecionadas'
+                },
+                {
+                    text: 'Teste',
+                    action: function() {
+                        // Obter os índices das linhas selecionadas
+                        var linhasSelecionadas = tabela.rows( { selected: true } ).indexes();
+                        // Obter os dados "codigo" das linhas selecionadas
+                        var codigosSelecionados = [];
+                        tabela.rows(linhasSelecionadas).data().each(function (row) {
+                            codigosSelecionados.push(row['codigo']);
+                        });
+                    $.ajax({
+                        url: 'definir',
+                        method: 'POST',
+                        data: { codigos: codigosSelecionados,
+                                obra: {{ id }} 
+                            },
+                        success: function (response) {
+                            console.log(response);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    })
+                    }
                 },
             ],
             rowId: 'codigo',
@@ -109,7 +138,6 @@
                 }
             }
         });
-
     });
  
 </script>
