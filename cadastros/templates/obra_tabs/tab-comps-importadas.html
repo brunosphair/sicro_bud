@@ -1,0 +1,32 @@
+{% extends 'modelo.html' %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block tabs %}
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="#">Composições Importadas</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Composições importadas</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Link</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled">Disabled</a>
+    </li>
+</ul>
+<br>
+
+{% endblock %}
+
+{% block content %}
+
+<a class="btn btn-primary" href="{% url 'select_comps' id %}" role="button">Importar Composições</a>
+
+{% endblock %}
+

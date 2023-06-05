@@ -5,8 +5,12 @@
 {% load humanize %}
 
 {% block content %}
-<h3>Composicões
+<h3>
+    Composicões
 </h3>
+<p class="lead">
+    Selecione as composicões que deseja importar.
+</p>
 <hr>
 <div class="table-responsive">
     <table class="table table-stripped table-hover" id="tabela-selecionar">
@@ -82,7 +86,7 @@
                     text: 'Mostrar apenas selecionadas'
                 },
                 {
-                    text: 'Teste',
+                    text: 'IMPORTAR COMPOSIÇÕES SELECIONADAS',
                     action: function() {
                         // Obter os índices das linhas selecionadas
                         var linhasSelecionadas = tabela.rows( { selected: true } ).indexes();
@@ -91,19 +95,30 @@
                         tabela.rows(linhasSelecionadas).data().each(function (row) {
                             codigosSelecionados.push(row['codigo']);
                         });
+                    
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                        }
+                    });
+                    
                     $.ajax({
-                        url: 'definir',
+                        url: 'http://localhost:8000/api/att-comps-obra/',
                         method: 'POST',
                         data: { codigos: codigosSelecionados,
-                                obra: {{ id }} 
+                                obra: {{ id }},
                             },
                         success: function (response) {
                             console.log(response);
+
+                            // Redirecionar para uma nova página após o sucesso
+                            window.location.href = 'http://localhost:8000/obra/{{ id }}/comps-importadas/'
                         },
                         error: function (xhr, status, error) {
                             console.error(error);
                         }
                     })
+
                     }
                 },
             ],

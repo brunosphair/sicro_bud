@@ -35,3 +35,6 @@ class CompsObra(models.Model):
     id = models.AutoField(primary_key=True)
     obra = models.ForeignKey(Obra, on_delete=models.CASCADE)
     composicao = models.ForeignKey(Sicro, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ('obra', 'composicao',)
