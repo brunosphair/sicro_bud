@@ -5,11 +5,13 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Obra, CompsObra
 from composicoes.models import Sicro
+from composicoes.views import get_composicoes
 
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+
 
 
 # Create your views here.
@@ -78,6 +80,26 @@ class ObraList(LoginRequiredMixin, ListView):
 
 class ObraCompsImportadas(TemplateView):
     template_name = 'obra_tabs/tab-comps-importadas.html'
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+        id_obra = kwargs.get('id')
+        obra_object = Obra.objects.get(id=id_obra)
+        estado = obra_object.estado
+        ano = obra_object.ano
+        mes = obra_object.mes
+        desonerado = 'N'
+
+        comp_list_dict = list(CompsObra.objects.filter(obra=id_obra).values_list('composicao', flat=True))
+
+        print(comp_list_dict)
+
+        lista_precos = get_composicoes(comp_list_dict, estado, ano, mes, desonerado)
+
+        context['lista_precos'] = lista_precos
+
+        return context
 
 
 def att_comps_obra(request):
