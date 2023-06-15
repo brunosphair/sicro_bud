@@ -62,6 +62,9 @@ class CompTodasView(TemplateView):
 
 def get_composicoes(comp_list, estado, ano, mes, desonerado):
 
+    if len(comp_list) == 0:
+        return []
+
     fic_list_dict = list(get_fic_info(estado, ano, mes).values())
 
     fic_dict = {}

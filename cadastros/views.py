@@ -102,7 +102,12 @@ class ObraCompsImportadas(TemplateView):
         return context
 
 
+class TesteDropdown(TemplateView):
+    template_name = 'listas/test.html'
+
+
 def att_comps_obra(request):
+
     if request.method == 'POST':
         # Obtém a lista de códigos enviada no corpo da requisição
         codigos = request.POST.getlist('codigos[]')
@@ -129,9 +134,11 @@ def att_comps_obra(request):
 
     elif request.method == 'DELETE':
         # Obtém a lista de códigos enviadas no corpo da requisição
-        codigos = request.POST.getlist('codigos[]')
+        print('teste')
+        codigos = request.GET.getlist('codigos')
+        print(codigos)
         # Obtém o valor da variável id correspondente ao id da obra
-        obra_id = request.POST.get('obra')
+        obra_id = request.GET.get('obra')
 
         try:
             # Obtém a instância de Obra correspondente ao id
