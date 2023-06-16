@@ -12,8 +12,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
-
-
 # Create your views here.
 
 
@@ -135,11 +133,11 @@ def att_comps_obra(request):
     elif request.method == 'DELETE':
         # Obtém a lista de códigos enviadas no corpo da requisição
         print('teste')
-        codigos = request.GET.getlist('codigos')
-        print(codigos)
+        codigos = request.GET.get('codigos').split(',')
+        print(codigos, len(codigos))
         # Obtém o valor da variável id correspondente ao id da obra
         obra_id = request.GET.get('obra')
-
+        print(obra_id)
         try:
             # Obtém a instância de Obra correspondente ao id
             obra = Obra.objects.get(id=obra_id)
