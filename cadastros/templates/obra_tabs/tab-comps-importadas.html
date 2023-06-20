@@ -1,0 +1,182 @@
+{% extends 'modelo.html' %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block tabs %}
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="#">Composições Importadas</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Composições importadas</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Link</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled">Disabled</a>
+    </li>
+</ul>
+<br>
+
+{% endblock %}
+
+{% block content %}
+
+<a class="btn btn-primary" href="{% url 'select_comps' id %}" role="button">Importar Composições</a>
+
+<br>
+<br>
+<h3>Composicões Importadas
+</h3>
+<hr>
+<div class="table-responsive">
+    <table class="table table-stripped table-hover" id="tabela-selecionar">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>Código</th>
+                <th>Grupo</th>
+                <th>Descrição</th>
+                <th>Custo Unitário</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+
+            {% for item in lista_precos %}
+            <tr>
+                <td></td>
+                <td><a href="{% url 'composicoes' estado='PR' ano=2022 mes=1 des='N' pk=item.codigo %}" class="link-primary" class="btn btn-warning btn-sm" title="Editar">
+                    <i class="fa-solid fa-magnifying-glass" style="color:#4c2061"></i>
+                    </a>
+                </td>
+                <td>{{ item.codigo }}</td>
+                <td>{{ item.grupo }}</td>
+                <td>{{ item.descricao }}</td>
+                <td class="text-center">R$ {{ item.custo|intcomma }}</td>
+            </tr>
+            
+            {% endfor %}
+        
+        </tbody>
+            
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        var tabela = $("#tabela-selecionar").DataTable({
+            columnDefs: [ {
+                orderable: false,
+                className: 'select-checkbox',
+                targets:   0
+            } ],
+            select: {
+                style:    'os',
+                selector: 'td:first-child'
+            },
+            order: [[ 1, 'asc' ]],
+            columns:[
+                { data: 'checkbox' },
+                { data: 'info' },
+                { data: 'codigo' },
+                { data: 'grupo' },
+                { data: 'descricao'},
+                { data: 'custo' }
+            ],
+            select: {
+                    style: 'multi'
+                },
+            dom: 'Bfrtip',
+            buttons: [
+                { 
+                    extend: 'showSelected',
+                    text: 'Mostrar apenas selecionadas'
+                },
+                {
+                    text: 'EXCLUIR COMPOSIÇÕES SELECIONADAS',
+                    action: function() {
+                        // Obter os índices das linhas selecionadas
+                        var linhasSelecionadas = tabela.rows( { selected: true } ).indexes();
+                        // Obter os dados "codigo" das linhas selecionadas
+                        var codigosSelecionados = [];
+                        tabela.rows(linhasSelecionadas).data().each(function (row) {
+                            codigosSelecionados.push(row['codigo']);
+                        });
+                    
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: 'http://localhost:8000/api/att-comps-obra/?codigos=' + codigosSelecionados.join(',') + '&obra=' + {{ id }},
+                        method: 'DELETE',
+                        data: { codigos: codigosSelecionados,
+                                obra: {{ id }},
+                            },
+                        success: function (response) {
+                            console.log(response);
+
+                            // Redirecionar para uma nova página após o sucesso
+                            window.location.href = 'http://localhost:8000/obra/{{ id }}/comps-importadas/'
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                        }
+                    })
+
+                    }
+                },
+            ],
+            rowId: 'codigo',
+            stateSave: true,
+            responsive: true,
+            // "bSort": false,
+            "aaSorting": [],
+            "pageLength": 50,
+            "language": {
+                "decimal": "",
+                "emptyTable": "Sem dados disponíveis",
+                "info": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+                "infoEmpty": "Mostrando de 0 até 0 de 0 registos",
+                "infoFiltered": "(filtrado de _MAX_ registos no total)",
+                "infoPostFix": "",
+                "thousands": ",",
+                "lengthMenu": "Mostrar _MENU_ registos",
+                "loadingRecords": "A carregar dados...",
+                "processing": "A processar...",
+                "search": "Procurar:",
+                "zeroRecords": "Não foram encontrados resultados",
+                "paginate": {
+                    "first": "Primeiro",
+                    "last": "Último",
+                    "next": "Seguinte",
+                    "previous": "Anterior"
+                },
+                "aria": {
+                    "sortAscending": ": ordem crescente",
+                    "sortDescending": ": ordem decrescente"
+                }
+            }
+        });
+    });
+ 
+</script>
+
+
+{% endblock %}

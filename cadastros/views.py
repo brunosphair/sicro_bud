@@ -1,14 +1,16 @@
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
+from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Obra
+from .models import Obra, CompsObra
+from composicoes.models import Sicro
+from composicoes.views import get_composicoes
 
 from django.urls import reverse_lazy
-
 from django.contrib.auth.mixins import LoginRequiredMixin
-
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -74,5 +76,79 @@ class ObraList(LoginRequiredMixin, ListView):
         return self.object_list
 
 
-class TesteObra(TemplateView):
+class ObraCompsImportadas(TemplateView):
+    template_name = 'obra_tabs/tab-comps-importadas.html'
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+        id_obra = kwargs.get('id')
+        obra_object = Obra.objects.get(id=id_obra)
+        estado = obra_object.estado
+        ano = obra_object.ano
+        mes = obra_object.mes
+        desonerado = 'N'
+
+        comp_list_dict = list(CompsObra.objects.filter(obra=id_obra).values_list('composicao', flat=True))
+
+        print(comp_list_dict)
+
+        lista_precos = get_composicoes(comp_list_dict, estado, ano, mes, desonerado)
+
+        context['lista_precos'] = lista_precos
+
+        return context
+
+
+class TesteDropdown(TemplateView):
     template_name = 'listas/test.html'
+
+
+def att_comps_obra(request):
+
+    if request.method == 'POST':
+        # Obtém a lista de códigos enviada no corpo da requisição
+        codigos = request.POST.getlist('codigos[]')
+        # Obtém o valor da variável id correspondente ao id da obra
+        obra_id = request.POST.get('obra')
+
+        try:
+            # Obtém a instância de Obra correspondente ao id
+            obra = Obra.objects.get(id=obra_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({'erro': 'Obra não encontrada.'}, status=400)
+
+        # Processar os códigos e adicionar à coluna 'codigo' da Tabela CompsObra
+        for codigo_id in codigos:
+            try:
+                # Obtpem a instância de composição correspondente ao codigo
+                codigo = Sicro.objects.get(codigo=codigo_id)
+            except ObjectDoesNotExist:
+                return JsonResponse({'erro': 'Composição não encontrada.'}, status=400)
+            if not CompsObra.objects.filter(composicao=codigo, obra=obra).exists():
+                CompsObra.objects.create(composicao=codigo, obra=obra)
+
+        return JsonResponse({'mensagem': 'Códigos adicionados com sucesso.'})
+
+    elif request.method == 'DELETE':
+        # Obtém a lista de códigos enviadas no corpo da requisição
+        print('teste')
+        codigos = request.GET.get('codigos').split(',')
+        print(codigos, len(codigos))
+        # Obtém o valor da variável id correspondente ao id da obra
+        obra_id = request.GET.get('obra')
+        print(obra_id)
+        try:
+            # Obtém a instância de Obra correspondente ao id
+            obra = Obra.objects.get(id=obra_id)
+        except ObjectDoesNotExist:
+            return JsonResponse({'erro': 'Obra não encontrada.'}, status=400)
+
+        # Exclui os objetos de CompsObra de uma só vez
+        CompsObra.objects.filter(composicao__in=codigos, obra=obra).delete()
+
+        # Retornar uma resposta de sucesso
+        return JsonResponse({'mensagem': 'Códigos excluídos com sucesso'})
+
+    else:
+        return JsonResponse({'erro': "Método inválido"}, status=400)

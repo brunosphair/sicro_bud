@@ -24,7 +24,7 @@
             {% for obra in object_list %}
             <tr>
                 <td>
-                    <a href="#" class="link-primary">{{ obra.nome }}</a>
+                    <a href="{% url 'tab-comps-importadas' obra.pk %}" class="link-primary">{{ obra.nome }}</a>
                 </td>
                 <td>{{ obra.ano }}</td>
                 <td>{{ obra.mes }}</td>

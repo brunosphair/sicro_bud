@@ -4,7 +4,9 @@ from .views import ObraCreate
 from .views import ObraUpdate
 from .views import ObraDelete
 from .views import ObraList
-from .views import TesteObra
+from .views import ObraCompsImportadas
+from .views import TesteDropdown
+from .views import att_comps_obra
 
 
 urlpatterns = [
@@ -16,5 +18,9 @@ urlpatterns = [
 
     path('listar/obras/', ObraList.as_view(), name='listar-obras'),
 
-    path('teste/obra/', TesteObra.as_view(), name='teste_obra')
+    path('api/att-comps-obra/', att_comps_obra, name='api-att-comps-obra'),
+
+    path('obra/<int:id>/comps-importadas/', ObraCompsImportadas.as_view(), name='tab-comps-importadas'),
+
+    path('teste_dropdown/', TesteDropdown.as_view(), name='teste_dropdown')
 ]

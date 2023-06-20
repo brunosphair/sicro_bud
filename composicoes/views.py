@@ -4,6 +4,7 @@ from .models import (
     EquipamentoRelacaoComp, MaterialRelacaoComp, MaterialCusto,
     AtividadeAuxiliarRelacaoComp, CompFIC, GrupoSicro
 )
+from cadastros.models import Obra
 from django.shortcuts import get_object_or_404
 from django.db.models import Case, F, OuterRef, Subquery, DecimalField, Sum, Value, When
 from django.db.models.functions import Cast
@@ -47,10 +48,10 @@ class CompTodasView(TemplateView):
         mes = kwargs.get('mes')
         desonerado = kwargs.get('des')
 
-        comp_list_dict = list(Sicro.objects.values('codigo'))
-        print(comp_list_dict)
+        comp_list = list(Sicro.objects.values_list('codigo', flat=True))
+        print(comp_list)
 
-        lista_precos = get_composicoes(comp_list_dict, estado, ano, mes, desonerado)
+        lista_precos = get_composicoes(comp_list, estado, ano, mes, desonerado)
 
         context['lista_precos'] = lista_precos
         time_end = time.time()
@@ -59,11 +60,11 @@ class CompTodasView(TemplateView):
         return context
 
 
-def get_composicoes(comp_list_dict, estado, ano, mes, desonerado):
+def get_composicoes(comp_list, estado, ano, mes, desonerado):
 
-    comp_list = []
-    for codigo in comp_list_dict:
-        comp_list.append(codigo['codigo'])
+    if len(comp_list) == 0:
+        return []
+
     fic_list_dict = list(get_fic_info(estado, ano, mes).values())
 
     fic_dict = {}
@@ -253,11 +254,15 @@ def get_composicoes(comp_list_dict, estado, ano, mes, desonerado):
         descricao = item['descricao']
         grupos_dict[codigo] = descricao
 
-    for item in comp_list_dict:
-        comp_code = item['codigo']
-        item['descricao'] = descricao_dict[comp_code]
-        item['custo'] = dict_custo_total[comp_code]
-        item['grupo'] = grupos_dict[comp_code[0:2]].upper()
+    comp_list_dict = []
+    for composicao in comp_list:
+        comp_code = composicao
+        dicionario = {}
+        dicionario['codigo'] = comp_code
+        dicionario['descricao'] = descricao_dict[comp_code]
+        dicionario['custo'] = dict_custo_total[comp_code]
+        dicionario['grupo'] = grupos_dict[comp_code[0:2]].upper()
+        comp_list_dict.append(dicionario)
 
     return comp_list_dict
 
@@ -563,6 +568,31 @@ class Composicao:
             custo_tempo_fixo = 0
 
         return custo_tempo_fixo
+
+
+class SelectCompsView(TemplateView):
+    template_name = 'lista_select_composicoes.html'
+
+    def get_context_data(self, **kwargs):
+        # obtencao das variaveis passadas na url
+        context = super().get_context_data(**kwargs)
+
+        id_obra = kwargs.get('id')
+        obra_object = Obra.objects.get(id=id_obra)
+        estado = obra_object.estado
+        ano = obra_object.ano
+        mes = obra_object.mes
+        desonerado = 'N'
+
+        print(estado, ano, mes)
+
+        comp_list = list(Sicro.objects.values_list('codigo', flat=True))
+
+        lista_precos = get_composicoes(comp_list, estado, ano, mes, desonerado)
+
+        context['lista_precos'] = lista_precos
+
+        return context
 
 
 def get_equip_info(estado, ano, mes, desonerado):
